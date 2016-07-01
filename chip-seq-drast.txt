@@ -1,0 +1,691 @@
+学习 4 篇CHIP-seq文献： 
+Genome-wide maps of chromatin state in pluripotent and lineage-committed cells. http://www.nature.com/nature/journal/v448/n7153/pdf/nature06008.pdf
+Mapping and analysis of chromatin state dynamics in nine human cell types(GSE26386): http://www.nature.com/nature/journal/v473/n7345/full/nature09906.html 
+Promiscuous RNA binding by Polycomb Repressive Complex 2 http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3823624/pdf/nihms517229.pdf
+CARM1 Methylates Chromatin Remodeling Factor BAF155 to Enhance Tumor Progression and Metastasis http://www.cell.com/cancer-cell/abstract/S1535-6108(13)00536-9
+
+
+## All samples were mapped from fastq files using BOWTIE [-m 1 -- best] to mm9 [UCSCmouse genome build 9]
+## Sequences were mapped to the human genome (hg19) using BOWTIE (--best –m 1) to yield unique alignments
+## Peaks were called by using HOMER [http://biowhat.ucsd.edu/homer/] and QuEST [http://mendel.stanford.edu/sidowlab/downloads/quest/].
+
+## bowie具体原理： http://biofinysics.blogspot.de/2014/05/how-does-bowtie2-assign-mapq-scores.html
+
+
+在人的细胞系上面做CHIP-seq，在老鼠细胞系做了mRNA芯片数据分析
+Total RNA of MDA-MB-231-BAF155WT and MDA-MB-231-BAF155R1064K cells were used for microarray analysis.
+which was hybridized to Affymetrix HG U133 Plus 2.0 microarrays containing 54,675 probesets for >47,000 transcripts and variants, including 38,500 human genes.
+To identify genes differentially expressed between MDA-MB-231-BAF155WT and MDA-MB-231-BAF155R1064K
+## http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4004525/bin/NIHMS556863-supplement-03.xlsx
+
+
+
+QuEST 2.4 (Valouev et al., 2008) was run using the recommend settings for transcription factor (TF) like binding with the following exceptions: 
+kde_bandwith=30, region_size=600, ChIP threshold=35, enrichment fold=3, rescue fold=3. 
+
+HOMER (Heinz et al., 2010) analysis was run using the default settings for peak finding. 
+False Discovery Rate (FDR) cut off was 0.001 (0.1%) for all peaks. 
+The tag density for each factor was normalized to 1x107 tags and displayed using the UCSC genome browser.
+Motif analysis (de novo and known), was performed using the HOMER software and Genomatix. 
+Peak overlaps were processed with HOMER and Galaxy (Giardine et al., 2005). 
+Peak comparisons between replicates were processed with EdgeR statistical package in R
+
+
+## ppt : http://159.149.160.51/epigen_milano/epigen_barozzi.pdf 
+## best practise: http://bioinformatics-core-shared-training.github.io/cruk-bioinf-sschool/
+## pipeline : https://github.com/shenlab-sinai/chip-seq_preprocess
+## https://sites.google.com/site/anshul...e/projects/idr  ## samtools view -b -F 1548 -q 30 chipSampleRep1.bam
+## pipeline : http://daudin.icmb.utexas.edu/wiki/index.php/ChIPseq_prep_and_map
+## pipeline : https://github.com/BradyLab/ChipSeq/blob/master/chipseq.sh
+## https://github.com/crukci-bioinformatics/chipseq-pipeline
+## https://github.com/ENCODE-DCC/chip-seq-pipeline
+
+## Hands-on introduction to ChIP-seq analysis - VIB Training   http://www.biologie.ens.fr/~mthomas/other/chip-seq-training/
+## video(A Step-by-Step Guide to ChIP-Seq Data Analysis Webinar) : http://www.abcam.com/webinars/a-step-by-step-guide-to-chip-seq-data-analysis-webinar
+## Using ChIP-Seq to identify and/or quantify bound regions (peaks)  http://barcwiki.wi.mit.edu/wiki/SOPs/chip_seq_peaks 
+## http://jura.wi.mit.edu/bio/education/hot_topics/ChIPseq/ChIPSeq_HotTopics.pdf
+## http://pedagogix-tagc.univ-mrs.fr/courses/ASG1/practicals/chip-seq/mapping_tutorial.html
+## 公开课： https://www.coursera.org/learn/galaxy-project/lecture/FUzcg/chip-sequence-analysis-with-macs
+##ＥＢＩ的教程：https://www.ebi.ac.uk/training/online/course/ebi-next-generation-sequencing-practical-course/chip-seq-analysis/chip-seq-practical
+## 日语教程：http://genomejack.net/download/GenomeJackBrowserAppendix/browser_appendix_j/tutorials/chipSeq.html
+## 台湾教程：http://lsl.sinica.edu.tw/Services/Class/files/20151118475_2.pdf 徐唯哲 Paul Wei-Che HSU
+中央研究院 分子生物研究所
+研究助技師
+## peak finder软件大全： http://wodaklab.org/nextgen/data/peakfinders.html
+## https://www.encodeproject.org/documents/049704a4-5c58-4631-acf1-4ef152bdb3ef/@@download/attachment/Learning_Chromatin_States_from_ChIP-seq_data.pdf
+## https://bioshare.bioinformatics.ucdavis.edu/bioshare/download/47aq5pp5mzza5vb/PDFs/Tuesday_MB_ChIP-Seq_Intro.pdf
+## paper： Large-Scale Quality Analysis of Published ChIP-seq Data http://www.g3journal.org/content/4/2/209.full
+## paper： Chip-seq data analysis: from quality check to motif discovery and more http://ccg.vital-it.ch/var/sib_april15/cases/landt12/strand_correlation.html 
+## Workshop hands on session(RNA-Seq / ChIP-Seq  ) :  https://hpc.oit.uci.edu/biolinux/handson.docx
+## http://www.gqinnovationcenter.com/documents/bioinformatics/ChIPseq.pptx
+## paper supplement : http://genome.cshlp.org/content/suppl/2015/10/02/gr.192005.115.DC1/Supplemental_Information.docx
+http://www.illumina.com/documents/products/datasheets/datasheet_chip_sequence.pdf
+
+http://www.ncbi.nlm.nih.gov/pubmed/22130887 "Analyzing ChIP-seq data: preprocessing, normalization, differential identification, and binding pattern characterization."
+http://www.ncbi.nlm.nih.gov/pubmed/22499706 "Normalization, bias correction, and peak calling for ChIP-seq." (stat heavy)
+http://www.ncbi.nlm.nih.gov/pubmed/24244136 "Practical guidelines for the comprehensive analysis of ChIP-seq data."
+http://www.ncbi.nlm.nih.gov/pubmed/25223782 "Identifying and mitigating bias in next-generation sequencing methods for chromatin biology."
+A quick search also turned up this recent paper (which I haven't read) that might be of interest to you
+
+http://www.ncbi.nlm.nih.gov/pubmed/24598259 "Impact of sequencing depth in ChIP-seq experiments."
+
+## figures: https://github.com/shenlab-sinai/ngsplot    
+https://github.com/daler/metaseq         	 
+http://liulab.dfci.harvard.edu/CEAS/usermanual.html 
+还有两个ｗｅｂ－ｔｏｏｌｓ也是可视化 
+ 
+ 
+bioconductor : 
+http://faculty.ucr.edu/~tgirke/HTML_Presentations/Manuals/Workshop_Dec_6_10_2012/Rchipseq/Rchipseq.pdf
+http://bioinformatics-core-shared-training.github.io/cruk-bioinf-sschool/Day4/chipqc_sweave.pdf
+http://bioconductor.org/packages/release/bioc/html/chipseq.html 
+http://bioconductor.org/help/workflows/chipseqDB/
+http://bioconductor.org/help/workflows/generegulation/
+http://bioconductor.org/help/course-materials/2009/EMBLJune09/Practicals/chipseq/BasicChipSeq.pdf
+
+
+## 公司教程： http://www.partek.com/Tutorials/microarray/Tiling/ChipSeqTutorial.pdf
+
+
+
+
+## pre-step: download sratoolkit /fastx_toolkit_0.0.13/fastqc/bowtie2/bwa/MACS2/HOMER/QuEST/mm9/hg19/bedtools
+## http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software
+## http://www.ncbi.nlm.nih.gov/books/NBK158900/
+
+## Download and install sratoolkit
+cd ~/biosoft
+mkdir sratoolkit &&  cd sratoolkit
+wget http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.6.3/sratoolkit.2.6.3-centos_linux64.tar.gz
+##
+##  Length: 63453761 (61M) [application/x-gzip]
+##  Saving to: "sratoolkit.2.6.3-centos_linux64.tar.gz"
+tar zxvf sratoolkit.2.6.3-centos_linux64.tar.gz
+
+## Download and install bedtools
+cd ~/biosoft
+mkdir bedtools &&  cd bedtools
+wget https://github.com/arq5x/bedtools2/releases/download/v2.25.0/bedtools-2.25.0.tar.gz
+## Length: 19581105 (19M) [application/octet-stream] 
+tar -zxvf bedtools-2.25.0.tar.gz
+cd bedtools2
+make
+
+
+
+## Download and install PeakRanger
+cd ~/biosoft
+mkdir PeakRanger &&  cd PeakRanger
+wget https://sourceforge.net/projects/ranger/files/PeakRanger-1.18-Linux-x86_64.zip/ 
+## Length: 1517587 (1.4M) [application/octet-stream]
+unzip PeakRanger-1.18-Linux-x86_64.zip
+~/biosoft/PeakRanger/bin/peakranger -h
+
+## Download and install bowtie
+cd ~/biosoft
+mkdir bowtie &&  cd bowtie
+wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.9/bowtie2-2.2.9-linux-x86_64.zip/download
+#Length: 27073243 (26M) [application/octet-stream]
+#Saving to: "download"   ## I made a mistake here for downloading the bowtie2 
+mv download  bowtie2-2.2.9-linux-x86_64.zip
+unzip bowtie2-2.2.9-linux-x86_64.zip
+ 
+mkdir -p ~/biosoft/bowtie/hg19_index 
+cd ~/biosoft/bowtie/hg19_index
+
+# download hg19 chromosome fasta files
+wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/chromFa.tar.gz
+# unzip and concatenate chromosome and contig fasta files
+tar zvfx chromFa.tar.gz
+cat *.fa > hg19.fa
+rm chr*.fa
+##  ~/biosoft/bowtie/bowtie2-2.2.9/bowtie2-build  ~/biosoft/bowtie/hg19_index/hg19.fa  ~/biosoft/bowtie/hg19_index/hg19
+
+
+## Download and install BWA
+cd ~/biosoft
+mkdir bwa &&  cd bwa
+http://sourceforge.net/projects/bio-bwa/files/
+tar xvfj bwa-0.7.12.tar.bz2 # x extracts, v is verbose (details of what it is doing), f skips prompting for each individual file, and j tells it to unzip .bz2 files
+cd bwa-0.7.12
+make
+export PATH=$PATH:/path/to/bwa-0.7.12 # Add bwa to your PATH by editing ~/.bashrc file (or .bash_profile or .profile file)
+# /path/to/ is an placeholder. Replace with real path to BWA on your machine
+source ~/.bashrc
+# bwa index [-a bwtsw|is] index_prefix reference.fasta
+bwa index -p hg19bwaidx -a bwtsw ~/biosoft/bowtie/hg19_index/hg19.fa 
+# -p index name (change this to whatever you want)
+# -a index algorithm (bwtsw for long genomes and is for short genomes)
+
+
+## Download and install macs2  
+## // https://pypi.python.org/pypi/MACS2/
+cd ~/biosoft
+mkdir macs2 &&  cd macs2
+wget  ~~~~~~~~~~~~~~~~~~~~~~MACS2-2.1.1.20160309.tar.gz
+tar zxvf MACS2-2.1.1.20160309.tar.gz
+cd MACS2-2.1.1.20160309
+python setup.py install --user 
+
+####################  below is the log: 
+Creating ~/.local/lib/python2.7/site-packages/site.py
+Processing MACS2-2.1.1.20160309-py2.7-linux-x86_64.egg
+Copying MACS2-2.1.1.20160309-py2.7-linux-x86_64.egg to ~/.local/lib/python2.7/site-packages
+Adding MACS2 2.1.1.20160309 to easy-install.pth file
+Installing macs2 script to ~/.local/bin
+Finished processing dependencies for MACS2==2.1.1.20160309
+############################################################  
+~/.local/bin/macs2 --help
+
+Example for regular peak calling:
+ 	macs2 callpeak -t ChIP.bam -c Control.bam -f BAM -g hs -n test -B -q 0.01
+Example for broad peak calling:
+ 	macs2 callpeak -t ChIP.bam -c Control.bam --broad -g hs --broad-cutoff 0.1
+
+## Download and install homer (Hypergeometric Optimization of Motif	EnRichment)
+## // http://homer.salk.edu/homer/
+## // http://blog.qiubio.com:8080/archives/3024	
+## pre-install: Ghostscript，seqlogo,blat
+cd ~/biosoft
+mkdir homer &&  cd homer
+wget http://homer.salk.edu/homer/configureHomer.pl 
+perl configureHomer.pl -install
+perl configureHomer.pl -install hg19
+	
+	
+## step1 : download raw data 
+cd ~ 
+mkdir CHIPseq_test && cd CHIPseq_test
+mkdir rawData && cd rawData
+## batch download the raw data by shell script :
+
+for ((i=593;i<601;i++)) ;do wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP033/SRP033492/SRR1042$i/SRR1042$i.sra;done
+
+## step2 :  change sra data to fastq files.
+## cell line: MCF7 //  Illumina HiSeq 2000 //  50bp // Single ends // phred+33
+## http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE52964
+## ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP033/SRP033492 
+
+621M Jun 27 14:03 SRR1042593.sra (16.9M reads)
+2.2G Jun 27 15:58 SRR1042594.sra (60.6M reads)
+541M Jun 27 16:26 SRR1042595.sra (14.6M reads)
+2.4G Jun 27 18:24 SRR1042596.sra (65.9M reads)
+814M Jun 27 18:59 SRR1042597.sra (22.2M reads)
+2.1G Jun 27 20:30 SRR1042598.sra (58.1M reads)
+883M Jun 27 21:08 SRR1042599.sra (24.0M reads)
+2.8G Jun 28 11:53 SRR1042600.sra (76.4M reads)
+
+ls *sra |while read id; do ~/biosoft/sratoolkit/sratoolkit.2.6.3-centos_linux64/bin/fastq-dump $id;done
+rm *sra
+
+##  621M --> 3.9G 
+##  2.2G --> 14G
+##  541M --> 3.3G
+##  2.4G --> 15G
+
+## step3 : download the results from paper 
+## http://www.bio-info-trainee.com/1571.html 
+mkdir paper_results && cd paper_results
+wget ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE52nnn/GSE52964/suppl/GSE52964_RAW.tar
+tar xvf GSE52964_RAW.tar  
+
+ls *gz |xargs gunzip
+
+## step4 : run FastQC to check the sequencing quality.
+
+ls *.fastq | while read id ; do ~/biosoft/fastqc/FastQC/fastqc $id;done
+## Sequence length 51 
+## %GC 39 
+## Adapter Content passed 
+
+The quality of the reads is pretty good, we don't need to do any filter or trim
+
+mkdir QC_results
+mv *zip *html QC_results/
+
+
+## step5 : alignment to mm9/hg19/ 
+
+#### step5.1 using bowtie2 to do alignment 
+##  ~/biosoft/bowtie/bowtie2-2.2.9/bowtie2-build  ~/biosoft/bowtie/hg19_index /hg19.fa  ~/biosoft/bowtie/hg19_index/hg19
+## cat >run_bowtie2.sh
+ls *.fastq | while read id ; 
+do  
+echo $id
+#~/biosoft/bowtie/bowtie2-2.2.9/bowtie2 -p 8 -x ~/biosoft/bowtie/hg19_index/hg19 -U $id   -S ${id%%.*}.sam  2>${id%%.*}.align.log; 
+#samtools view -bhS -q 30  ${id%%.*}.sam > ${id%%.*}.bam  ## -F 1548 https://broadinstitute.github.io/picard/explain-flags.html
+#  -F 0x4  remove the reads that didn't match 
+samtools sort   ${id%%.*}.bam ${id%%.*}.sort  ## prefix for the output  
+#    samtools view  -bhS	 a.sam | samtools sort -o  -  ./ > a.bam
+samtools index ${id%%.*}.sorted.bam 
+done 
+
+#Only reads that had a unique alignment and mapping quality of ≥10 were retained. 
+
+SRR1042593.fastq
+16902907 reads; of these:
+  16902907 (100.00%) were unpaired; of these:
+    667998 (3.95%) aligned 0 times
+    12467095 (73.76%) aligned exactly 1 time
+    3767814 (22.29%) aligned >1 times
+96.05% overall alignment rate
+[samopen] SAM header is present: 93 sequences.
+SRR1042594.fastq
+60609833 reads; of these:
+  60609833 (100.00%) were unpaired; of these:
+    9165487 (15.12%) aligned 0 times
+    39360173 (64.94%) aligned exactly 1 time
+    12084173 (19.94%) aligned >1 times
+84.88% overall alignment rate
+[samopen] SAM header is present: 93 sequences.
+SRR1042595.fastq
+14603295 reads; of these:
+  14603295 (100.00%) were unpaired; of these:
+    918028 (6.29%) aligned 0 times
+    10403045 (71.24%) aligned exactly 1 time
+    3282222 (22.48%) aligned >1 times
+93.71% overall alignment rate
+[samopen] SAM header is present: 93 sequences.
+SRR1042596.fastq
+65911151 reads; of these:
+  65911151 (100.00%) were unpaired; of these:
+    10561790 (16.02%) aligned 0 times
+    42271498 (64.13%) aligned exactly 1 time
+    13077863 (19.84%) aligned >1 times
+83.98% overall alignment rate
+[samopen] SAM header is present: 93 sequences.
+SRR1042597.fastq
+22210858 reads; of these:
+  22210858 (100.00%) were unpaired; of these:
+    1779568 (8.01%) aligned 0 times
+    15815218 (71.20%) aligned exactly 1 time
+    4616072 (20.78%) aligned >1 times
+91.99% overall alignment rate
+[samopen] SAM header is present: 93 sequences.
+SRR1042598.fastq
+58068816 reads; of these:
+  58068816 (100.00%) were unpaired; of these:
+    8433671 (14.52%) aligned 0 times
+    37527468 (64.63%) aligned exactly 1 time
+    12107677 (20.85%) aligned >1 times
+85.48% overall alignment rate
+[samopen] SAM header is present: 93 sequences.
+SRR1042599.fastq
+24019489 reads; of these:
+  24019489 (100.00%) were unpaired; of these:
+    1411095 (5.87%) aligned 0 times
+    17528479 (72.98%) aligned exactly 1 time
+    5079915 (21.15%) aligned >1 times
+94.13% overall alignment rate
+[samopen] SAM header is present: 93 sequences.
+SRR1042600.fastq
+76361026 reads; of these:
+  76361026 (100.00%) were unpaired; of these:
+    8442054 (11.06%) aligned 0 times
+    50918615 (66.68%) aligned exactly 1 time
+    17000357 (22.26%) aligned >1 times
+88.94% overall alignment rate
+[samopen] SAM header is present: 93 sequences.
+
+
+## step6 : peak calling 
+### step6.1: with MACS2  
+
+macs2 callpeak -t TF_1.bam -c Input.bam -n mypeaks
+We used the following options:
+-t: This is the only required parameter for MACS, refers to the name of the file with the ChIP-seq data
+-c: The control or mock data file
+-n: The name string of the experiment
+MAC2 creates 4 files (mypeaks peaks.narrowPeak, mypeaks summits.bed, mypeaks peaks.xls and mypeaks model.r)
+# MACS首先的工作是要确定一个模型，这个模型最关键的参数就是峰宽d。这个d就是bw(band width)，而它的一半就是shiftsize。
+GSM1278641	Xu_MUT_rep1_BAF155_MUT	SRR1042593
+GSM1278642	Xu_MUT_rep1_Input	SRR1042594
+GSM1278643	Xu_MUT_rep2_BAF155_MUT	SRR1042595
+GSM1278644	Xu_MUT_rep2_Input	SRR1042596
+GSM1278645	Xu_WT_rep1_BAF155	SRR1042597
+GSM1278646	Xu_WT_rep1_Input	SRR1042598
+GSM1278647	Xu_WT_rep2_BAF155	SRR1042599
+GSM1278648	Xu_WT_rep2_Input	SRR1042600
+
+848M Jun 28 14:31 SRR1042593.bam
+2.7G Jun 28 14:52 SRR1042594.bam
+716M Jun 28 14:58 SRR1042595.bam
+2.9G Jun 28 15:20 SRR1042596.bam
+1.1G Jun 28 15:28 SRR1042597.bam
+2.6G Jun 28 15:48 SRR1042598.bam
+1.2G Jun 28 15:58 SRR1042599.bam
+3.5G Jun 28 16:26 SRR1042600.bam
+
+## http://www2.uef.fi/documents/1698400/2466431/Macs2/f4d12870-34f9-43ef-bf0d-f5d087267602
+## http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3120977/
+
+
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042594.bam -t SRR1042593.bam -f BAM -B -g hs -n Xu_MUT_rep1 2>Xu_MUT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042596.bam -t SRR1042595.bam -f BAM -B -g hs -n Xu_MUT_rep2 2>Xu_MUT_rep2.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042598.bam -t SRR1042597.bam -f BAM -B -g hs -n Xu_WT_rep1  2>Xu_WT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042600.bam -t SRR1042599.bam -f BAM -B -g hs -n Xu_WT_rep2  2>Xu_WT_rep2.masc2.log &
+
+## forget to sort the bam files: 
+
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042594.sorted.bam -t SRR1042593.sorted.bam -f BAM -B -g hs -n Xu_MUT_rep1 2>Xu_MUT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042596.sorted.bam -t SRR1042595.sorted.bam -f BAM -B -g hs -n Xu_MUT_rep2 2>Xu_MUT_rep2.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042598.sorted.bam -t SRR1042597.sorted.bam -f BAM -B -g hs -n Xu_WT_rep1  2>Xu_WT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042600.sorted.bam -t SRR1042599.sorted.bam -f BAM -B -g hs -n Xu_WT_rep2  2>Xu_WT_rep2.masc2.log &
+
+## Then change the control and treatment 
+nohup time ~/.local/bin/macs2 callpeak -t SRR1042594.sorted.bam -c SRR1042593.sorted.bam -f BAM -B -g hs -n Xu_MUT_rep1 2>Xu_MUT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -t SRR1042596.sorted.bam -c SRR1042595.sorted.bam -f BAM -B -g hs -n Xu_MUT_rep2 2>Xu_MUT_rep2.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -t SRR1042598.sorted.bam -c SRR1042597.sorted.bam -f BAM -B -g hs -n Xu_WT_rep1  2>Xu_WT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -t SRR1042600.sorted.bam -c SRR1042599.sorted.bam -f BAM -B -g hs -n Xu_WT_rep2  2>Xu_WT_rep2.masc2.log &
+
+## then just use the sam files.
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042594.sam -t SRR1042593.sam -f SAM -B -g hs -n Xu_MUT_rep1 2>Xu_MUT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042596.sam -t SRR1042595.sam -f SAM -B -g hs -n Xu_MUT_rep2 2>Xu_MUT_rep2.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042598.sam -t SRR1042597.sam -f SAM -B -g hs -n Xu_WT_rep1  2>Xu_WT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042600.sam -t SRR1042599.sam -f SAM -B -g hs -n Xu_WT_rep2  2>Xu_WT_rep2.masc2.log &
+
+## then chang the criteria for p values :
+https://github.com/taoliu/MACS/
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042594.sam -t SRR1042593.sam -f SAM -p 0.01  -g hs -n Xu_MUT_rep1 2>Xu_MUT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042596.sam -t SRR1042595.sam -f SAM -p 0.01  -g hs -n Xu_MUT_rep2 2>Xu_MUT_rep2.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042598.sam -t SRR1042597.sam -f SAM -p 0.01  -g hs -n Xu_WT_rep1  2>Xu_WT_rep1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak -c SRR1042600.sam -t SRR1042599.sam -f SAM -p 0.01  -g hs -n Xu_WT_rep2  2>Xu_WT_rep2.masc2.log &
+
+  18919 Xu_MUT_rep1_peaks.xls
+   36277 Xu_MUT_rep2_peaks.xls
+   32494 Xu_WT_rep1_peaks.xls
+   56080 Xu_WT_rep2_peaks.xls
+
+
+## check in IGV: 
+~/biosoft/IGVTools/igvtools toTDF -z 5 Xu_MUT_rep1_control_lambda.bdg Xu_MUT_rep1_control_lambda.tdf hg19
+~/biosoft/IGVTools/igvtools toTDF -z 5 Xu_MUT_rep1_treat_pileup.bdg Xu_MUT_rep1_treat_pileup.tdf hg19
+
+## check some peaks 手动的 ## chr1    121484235       121485608 
+## masc results : 
+samtools depth -r chr10:42385331-42385599 SRR1042593.sorted.bam
+samtools depth -r chr10:42385331-42385599 SRR1042594.sorted.bam   
+samtools depth -r chr20:45810382-45810662 SRR1042593.sorted.bam
+samtools depth -r chr20:45810382-45810662 SRR1042594.sorted.bam 
+
+paper results: 
+chr20   45796362        46384917
+chr1    121482722       121485861
+samtools depth -r chr1:121482722-121485861 SRR1042593.sorted.bam
+samtools depth -r chr1:121482722-121485861 SRR1042594.sorted.bam   
+samtools depth -r chr20:45796362-46384917 SRR1042593.sorted.bam
+samtools depth -r chr20:45796362-46384917 SRR1042594.sorted.bam 
+
+### step6.2 peak calling by HOMER
+http://homer.salk.edu/homer/ngs/peaks.html
+To find peaks for a transcription factor use the findPeaks command:
+findPeaks <tag directory> -style factor -o auto -i <input tag directory>
+i.e. findPeaks ERalpha-ChIP-Seq/ -style factor -o auto -i MCF7-input-ChIP-Seq
+#### http://fasta.bioch.virginia.edu/cshl/pdf/14/hawkins_L1_2014.pdf
+#### http://informatics-reports.liai.org/dokuwiki/lib/exe/fetch.php?media=homer.pptx
+首先需要把alignment的文件转为tag directory   # http://homer.salk.edu/homer/ngs/tagDir.html
+
+然后对input和treatment的tag directory 来找 peaks
+
+
+### step6.3 peak calling by SICERpy 
+# SICER is a popular peak caller particularly suitable for detection of broad ChIP-Seq marks.
+# A clustering approach for identification of enriched domains from histone modification ChIP-Seq data 
+#### github : https://github.com/dariober/SICERpy
+#### author: http://home.gwu.edu/~wpeng/Software.htm 
+
+### step6.4 peak calling by PePr 
+# PePr is a ChIP-Seq Peak-calling and Prioritization pipeline that uses a sliding window approach and models read counts across replicates and between groups with a negative binomial distribution.
+# For peak-calling, run: PePr -c chip_rep1.bam,chip_rep2.bam -i input_rep1.bam,input_rep2.bam -f bam
+#### github : https://github.com/shawnzhangyx/PePr
+#### author: http://home.gwu.edu/~wpeng/Software.htm 
+
+PePr -c chip_rep1.bam,chip_rep2.bam -i input_rep1.bam,input_rep2.bam -f bam
+PePr -c chip1_rep1.bam,chip1_rep2.bam -i input1_rep1.bam,input1_rep2.bam --chip2 chip2_rep1.bam,chip2_rep2.bam --input2 input2_rep2.bam,input2_rep2.bam -f bam --diff
+PePr -c chip1_rep1.bam,chip1_rep2.bam --chip2 chip2_rep1.bam,chip2_rep2.bam -f bam --diff 
+
+### step6.5  peak calling by SWEMBL 
+# A fast, memory-efficient peak-calling tool package for functional genomic and other data sets.
+#  SISSRs takes as input a data file containing genomic coordinates of the mapped reads for your protein of
+#  interest and an optional background file containing control data (IgG, input DNA, etc.) in BED file format 
+#  In BED file format, each line contains 6 tab- or space-separated terms 
+#### software : http://www.ebi.ac.uk/~swilder/SWEMBL/
+#### readme: http://www.ebi.ac.uk/~swilder/SWEMBL/beginners.html
+
+### step6.6  peak calling by SISSRs peak-finder 
+# Genome-Wide Identification of in Vivo Protein-DNA Binding Sites From ChIP-Seq Data
+#  
+#### software : http://sissrs.rajajothi.com/
+#### readme: https://dir.nhlbi.nih.gov/papers/lmi/epigenomes/sissrs/SISSRs-Manual.pdf
+
+
+### step6.7 peak calling by BayesPeak(R bioconductor package) 
+#  Bayesian Analysis of ChIP-seq data 
+## BayesPeak fits a Markov model to the data (the aligned reads) via Markov Chain Monte Carlo (MCMC) techniques.
+
+# I've used BayesPeak running in R. It is much easier to install than MACS (failed for me), which require some (strange to me) files.
+# 首先要把bowtie2比对好的alignment文件bam格式转换为bed格式： http://bedtools.readthedocs.io/en/latest/content/tools/bamtobed.html
+##  In particular, the chromosome, start position, end position and DNA strand appear in the 1st, 2nd, 3rd and 6th columns respectively.
+#### software : http://bioconductor.org/packages/release/bioc/html/BayesPeak.html
+#### readme: http://bioconductor.org/packages/release/bioc/vignettes/BayesPeak/inst/doc/BayesPeak.pdf
+examples: 
+
+library(BayesPeak)
+tFile=file.path(system.file(package='BayesPeak'),'extdata','H3K4me3reduced.bed')
+cFile=file.path(system.file(package='BayesPeak'),'extdata','Inputreduced.bed')
+
+raw.output <- bayespeak(tFile, cFile, chr = "chr16", start = 9.2E7, end = 9.5E7, job.size = 6E6)
+output <- summarize.peaks(raw.output, method = "lowerbound")
+## the function summarize.peaks will do :  Filtering of unenriched jobs/Filtering of unenriched bins/Assembly of enriched bins/Conversion of bins to peaks
+
+write.table(as.data.frame(output), file = "H3K4me3output.txt", quote = FALSE)
+## write.csv(as.data.frame(output), file = "H3K4me3output.csv", quote = FALSE)
+## 可以借助多线程来加快运行速度： 
+library(parallel)
+## 还需要 检查pp这个阈值的选取  # A “potentially enriched” bin is defined as any bin with PP > 0.01. 
+The output of the algorithm is the Posterior Probability (often abbreviated to PP) of each bin being enriched.
+The PP value is useful not only for calling the peaks, but could also be used in downstream analyses - for
+example, to weight observations when searching for a novel transcription factor motif. The PP value is not
+to be confused with the p value from hypothesis testing
+
+> min.job <- min(raw.output$peaks$job)
+> max.job <- max(raw.output$peaks$job)
+> par(mfrow = c(2,2), ask = TRUE)
+> for(i in min.job:max.job) {plot.PP(raw.output, job = i, ylim = c(0,50))}
+When the coverage is sparse and therefore less information is available, the PP values tend to be more
+uniformly spread over the interval [0,1], as above. This means that the distinction between peaks and
+background is harder to make, which is usually a result of poor enrichment,
+
+raw.output <- bayespeak(tFile, cFile,use.multicore = TRUE, mc.cores = 4)
+i <- 324
+plot.PP(raw.output, job = i, ylim = c(0,50))
+
+############ first change bam files to bed files :
+ls *sorted.bam |while read id ;do  ~/biosoft/bedtools/bedtools2/bin/bedtools bamtobed -i $id > ${id%%.*}.bed ;done
+但是要过滤掉特殊染色体(chr6_cox_hap2,chrUn_gl000214)，仅仅保留CHR1-22,X,Y,M
+ls *bed |while read id ;do grep -v "_" $id >${id%%.*}.clean_bed;done
+
+############ Then do peak calling in R by BayesPeak 
+library(BayesPeak)
+library(parallel)
+workdir=getwd()
+tFile=file.path(workdir,'SRR1042593.clean_bed')
+cFile=file.path(workdir,'SRR1042594.clean_bed')
+raw.output <- bayespeak(tFile, cFile,use.multicore = TRUE, mc.cores = 8)
+output <- summarize.peaks(raw.output, method = "lowerbound")
+write.table(as.data.frame(output), file = "Xu_MUT_rep1.txt", quote = FALSE)
+
+
+### step6.8  peak calling by PeakRanger
+# PeakRanger is a multi-purporse software suite for analyzing next-generation sequencing (NGS) data. The suite contains the following tools:
+# Used by modENCODE, iPlant and many others 
+# Not just for calling narrow and broad peaks 
+# Runs fast, together with sleek program options
+To measure the significance of the enriched regions, PeakRanger uses binormial distribution to model the relative enrichment of sample over control.
+A p value is generated as a result. Users can thus select highly significant peaks by using a smaller -p. 
+In addition, users can filter peaks by the '-q' option, which controls the FDR of peaks. 
+For each p-value, the Benjamini-Hochberg procedure is applied to calculate the FDR.
+# http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz ##  gunzip refGene.txt.gz ; mv refGene.txt  hg19refGene.txt
+#### software : http://ranger.sourceforge.net/  go to the root path of the unzipped package and type:make 
+#### readme:   http://ranger.sourceforge.net/manual1.18.html
+# http://www.broadinstitute.org/~anshul/projects/encode/preprocessing/peakcalling/peakranger/bin/MANUAL
+
+### ~/biosoft/PeakRanger/bin/peakranger -h
+         nr      estimate data quality
+         lc      calculate library complexity
+         wig     generate wiggle files
+         wigpe   generate wiggle files for paired reads
+         ranger  peak calling for sharp peaks
+         ccat    peak calling for broad peaks
+         bcp     peak calling for complex broad peaks
+
+~/biosoft/PeakRanger/bin/peakranger nr   --format bed SRR1042593.clean_bed   SRR1042594.clean_bed
+~/biosoft/PeakRanger/bin/peakranger ccat --format bed SRR1042593.clean_bed   SRR1042594.clean_bed  \
+Xu_MUT_rep1_ccat_report --report --gene_annot_file hg19refGene.txt -q 0.05  -t 4  
+
+很快就出结果，找到的peak非常多，但是需要过滤
+844K Jun 30 09:32 Xu_MUT_rep1_ccat_report_details
+637K Jun 30 09:32 Xu_MUT_rep1_ccat_report_region.bed
+798K Jun 30 09:32 Xu_MUT_rep1_ccat_report_summit.bed
+需要重点看到就是details文件，格式如下：很容易理解
+#region_chr     region_start    region_end      nearby_genes(6kbp)      region_ID       region_summits  region_fdr      region_strand   region_treads   region_creads
+chr1    121482750       121486000               ccat_fdrPassed_0_fdr_0.001      121485025       0.001   +       551     642
+chr1    115296600       115302500       CSDE1   ccat_fdrFailed_0_fdr_0.646      115301075       0.646   +       58      217
+chr1    114351100       114356850       PTPN22,RSBN1    ccat_fdrFailed_3_fdr_0.646      114355425       0.646   +       48      112
+
+
+Guide: Peak Calling for ChIP-Seq :　http://epigenie.com/guide-peak-calling-for-chip-seq/
+
+
+
+
+
+
+## step7 :  check the quality of ChIP.
+
+## step7.1 by PhantomPeak
+
+## step7.2 by CHANCE  ##　MATLAB Compiler Runtime
+## MANUAL : https://github.com/songlab/chance/wiki/CHANCE-Manual
+## input data : alignment bam files 
+
+
+## step7, checked Irreproducibility Discovery Rate (IDR)
+
+
+
+
+## step : Differential Peaks Between Replicates
+### https://www.biostars.org/p/66464/
+http://genomicsclass.github.io/book/pages/ChIPseq.html
+
+
+## step7 : peak annotation and Motif Discovery by HOMER 
+### step7.1 : Finding Enriched Motifs in Genomic Regions (findMotifsGenome.pl)
+http://homer.salk.edu/homer/motif/index.html 
+http://homer.salk.edu/homer/ngs/peakMotifs.html
+There are 3 basic ways to run HOMER - with FASTA files, with Gene Identifiers, or from Genomic Positions.  
+
+### step7.2 : Annotating Regions in the Genome (annotatePeaks.pl)
+http://homer.salk.edu/homer/ngs/annotation.html
+
+
+
+# step7 :  Loading peak call data into the R environment
+links : http://bioinformatics-core-shared-training.github.io/cruk-bioinf-sschool/Day4/chipqc_sweave.pdf
+
+The peak file contains the genomic intervals for each peaks and it is named mypeaks peaks.narrowPeak (the prefix
+’mypeaks’ of the filename was given by the -n parameter). The NarrowPeak format is a extension of BED format. The
+USCS webpage contains information about what each column in the NarrowPeak format means (http://genome.ucsc.
+edu/FAQ/FAQformat.html#format12).
+You can load theNarrowPeak file into R using the read.delim function. We specify header=FALSE to indicate that the
+file does not contain column names as its first line.
+#Run this in R
+	setwd("/home/participant/Desktop/Course_Materials")
+	mypeaks <- read.delim("Day4/data_for_practical/mypeaks_peaks.narrowPeak", header=F)
+	colnames(mypeaks) <- c("chrom", "chromStart", "chromEnd", "name","score", "strand", "fold.enrichment","log10.pvalue", "log10.qvalue", "peak")
+Because the NarrowPeak format is a extension of BED format, you will need to convert the 0-base start coordinates
+encoded in the BED format to 1-base start coordinates (just sum +1 to every start coordinate). Remember, only the
+start coordinated have to be shifted, the end coordinates don’t have to be shifted
+	library(GenomicRanges)
+	GRanges(mypeaks$chrom, IRanges(mypeaks$chromStart+1, mypeaks$chromEnd))
+
+# step7 : CHIP-seq data quality control by ChIPQC package 
+The analysis of the quality of this experiment’s ChIP quality using ChIPQC has identified several features of the data as
+well as highlighted variability in quality across ChIPs and cell-lines
+ChIPQCreport 
+
+
+## step7 :  annotation of the peaks identified from ChIP-seq by ChIPpeakAnno
+# http://bioconductor.org/packages/release/bioc/html/ChIPpeakAnno.html
+# https://www.bioconductor.org/packages/devel/bioc/vignettes/ChIPpeakAnno/inst/doc/ChIPpeakAnno.html
+The input for ChIPpeakAnno1 is a list of called peaks identified from ChIP-seq experiments or any other experiments that yield a set of chromosome coordinates. 
+Although peaks are represented as GRanges in ChIPpeakAnno, other common peak formats such as BED, GFF and MACS can be converted to GRanges easily using a conversion toGRanges method.
+
+
+
+## 统计peaks在各种基因组区域(基因上下游，5,3端UTR，启动子，内含子，外显子，基因间区域，microRNA区域)分布情况
+library(ChIPpeakAnno) 
+library(TxDb.Hsapiens.UCSC.hg19.knownGene) 
+path1 <- file.path(pwd,'GSM1278641_Xu_MUT_rep1_BAF155_MUT.peaks.bed.gz')
+gr1 <- toGRanges(path1, format="BED") 
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+aCR<-assignChromosomeRegion(gr1, nucleotideLevel=FALSE, 
+                            precedence=c("Promoters", "immediateDownstream", 
+                                         "fiveUTRs", "threeUTRs", 
+                                         "Exons", "Introns"), 
+                            TxDb=TxDb.Hsapiens.UCSC.hg19.knownGene)
+barplot(aCR$percentage, las=3)
+ 
+## 统计peaks在某种基因区域的分布情况
+library(ChIPpeakAnno) 
+library(TxDb.Hsapiens.UCSC.hg19.knownGene) 
+path1 <- file.path(pwd,'GSM1278641_Xu_MUT_rep1_BAF155_MUT.peaks.bed.gz')
+gr1 <- toGRanges(path1, format="BED") 
+data(TSS.human.GRCh37)
+binOverFeature(gr1, annotationData=TSS.human.GRCh37,
+               radius=5000, nbins=10, FUN=length)
+# In addition, assignChromosomeRegion can be used to summarize the distribution of peaks over different type of features such as exon, intron, enhancer, proximal promoter, 5’ UTR and 3’ UTR. 
+# Please note that one peak might span multiple type of features, leading to the number of annotated features greater than the total number of input peaks.			   
+ 
+
+##  对peak注释基因，homer软件也可以做
+library(ChIPpeakAnno)
+## import the MACS output
+macs <- system.file("extdata", "MACS_peaks.xls", package="ChIPpeakAnno")
+macsOutput <- toGRanges(macs, format="MACS")
+## annotate the peaks with precompiled ensembl annotation
+data(TSS.human.GRCh38)
+macs.anno <- annotatePeakInBatch(macsOutput, AnnotationData=TSS.human.GRCh38) ## nearestLocation (default)
+## add gene symbols
+library(org.Hs.eg.db)
+macs.anno <- addGeneIDs(annotatedPeak=macs.anno, 
+                        orgAnn="org.Hs.eg.db", 
+                        IDs2Add="symbol")
+						
+						
+#  用biomaRt 来找各种基因组区域(基因上下游，5,3端UTR，启动子，内含子，外显子，基因间区域，microRNA区域)GRange
+
+library(biomaRt)
+mart = useMart(biomart = "ENSEMBL_MART_ENSEMBL", host="grch37.ensembl.org", path="/biomart/martservice", dataset = "hsapiens_gene_ensembl") 
+getAnnotation(mart, 
+featureType=c("TSS","miRNA", "Exon", "5utr", "3utr", "ExonPlusUtr", "transcript"))
+
+mart<-useMart(biomart="ensembl",dataset="hsapiens_gene_ensembl")
+Annotation = getAnnotation(mart, featureType="TSS")   ## TSS.human.GRCh37
+	
+
+Gene model with exon, 5' UTR and 3' UTR information for human sapiens (GRCh37) obtained from biomaRt
+data(ExonPlusUtr.human.GRCh37)
+TSS annotation for human sapiens (GRCh37) obtained from biomaRt
+data(TSS.human.GRCh37)
+
+
+https://www.biostars.org/p/60174/
+Also, including reads mapped to the mitochondrial genome (chrM) adversely effect the FDR calculation. I routinely map reads to all the available reference sequence (e.g. human: chr 1-22, X, Y, chrM, unassembled contigs "random"), but only use the reads that map to chr 1-22, X and Y for peak calling. This seems to work best.						
+https://www.biostars.org/p/55831/
+
+
+
+
+
