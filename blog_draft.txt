@@ -1,0 +1,136 @@
+ENCODE计划涉及到的cell type : http://genome.ucsc.edu/ENCODE/cellTypes.html
+UCSC 浏览器，根据染色体及坐标　：http://genome.ucsc.edu/cgi-bin/hgGateway?org=Human&db=hg19
+推荐一本书： http://genomicsclass.github.io/book/
+ENCODE计划托管在broad institute的所有资料： http://www.broadinstitute.org/~anshul/projects/encode/
+ROADmap 计划托管在broad institute的所有资料： http://www.broadinstitute.org/~anshul/projects/roadmap/
+
+给他写信：
+MD Anderson Cancer Center
+Houston tangming2005@gmail.com 
+http://crazyhottommy.blogspot.com/
+感谢他在biostars上面帮助了我：
+https://www.biostars.org/u/7822/
+
+
+http://bioinformatics.oxfordjournals.org/content/early/2011/06/22/bioinformatics.btr375.full.pdf
+https://www.bioconductor.org/packages/release/bioc/html/AtlasRDF.html
+https://www.bioconductor.org/packages/3.3/bioc/manuals/ontoCAT/man/ontoCAT.pdf
+https://www.bioconductor.org/packages/devel/bioc/vignettes/ontoCAT/inst/doc/ontoCAT.pdf
+
+用AtlasRDF包来查询EBI的RDF格式综合数据库
+source("http://bioconductor.org/biocLite.R")
+biocLite("AtlasRDF")
+biocLite("ontoCAT")
+library(AtlasRDF)
+library(ontoCAT)
+
+#########这种需要联网的包，可能都需要设置代理
+#How to set proxy settings for R
+#http://stackoverflow.com/questions/6467277/proxy-setting-for-r
+#Sys.setenv(http_proxy="http://staff-proxy.ul.ie:8080")
+Sys.setenv(http_proxy="http://sg_proxy.xh3.lilly.com:9000")
+getURL("http://www.omegahat.net/RCurl/")
+
+##  整个R包就是把一个RDF查询界面给包装了一下：http://www.ebi.ac.uk/rdf/services/atlas/sparql
+## 构造一个query语句，然后用SPARQL函数来查询数据库
+
+########################1, 查询EFO的ID号
+termhits <- searchForEFOTerms("type II diabetes") 
+print(termhits)
+
+
+########################2, 根据EFO的ID号来查询基因list 
+humanURI <- getTaxonURI("human")
+typeIIgenelist <- getSpeciesSpecificEnsemblGenesForExFactor(termhits[1,1], taxon=humanURI)
+head(typeIIgenelist)
+                                                              
+########################3, 因为数据库的改变，很多函数都已经没办法用了
+#pathways <- getRankedPathwaysForGeneIds(typeIIgenelist[,3])
+#head(pathways)
+## getGenesForPathwayURI//getRankedPathwaysForGeneIds// getOntologyMappings
+
+
+## 下面的函数是为了对pathway的富集分析结果画图(pathway的含义非常丰富)
+data(transcription_pathway_enrichment)  ## example enrichment results
+vizgraph <- vizPvalues(transcription_pathway_enrichment, "0.00005")
+##The ontology class for disease is efo:EFO 0000408 so let's include only subtypes of this class
+filteredgenes <- includeOnlySubclasses("efo:EFO_0000408", transcription_pathway_enrichment)
+# Though we still have quite a lot of results, even from this　lter, so let's take the top 20 most enriched experimental factors.
+#filteredgenes <- transcription_pathway_enrichment
+
+sortedset <- orderEnrichmentResults(filteredgenes)
+vizgraph <- vizPvalues(sortedset[1:50], 0.000001)
+sortedset[1]
+#get experiments for first enriched gene
+experiments <- getExperimentIdsForGeneURI(sortedset[[1]]@enrichedgenes[1])
+#look at first 5 experiment IDs
+experiments[1:5]
+
+
+### 用 ontoCAT 这个R包来浏览 owl 格式的ontology文件
+The ontoCAT R package consists of convenient methods for working
+with ontologies in the R environment. T
+source("http://bioconductor.org/biocLite.R")
+biocLite("AtlasRDF")
+biocLite("ontoCAT")
+rm(list=ls())
+library(AtlasRDF)
+library(ontoCAT)
+# ontoCAT: package for basic operations with ontologies
+ls('package:ontoCAT')
+Sys.setenv(http_proxy="http://sg_proxy.xh3.lilly.com:9000")
+### 首先下载两个源文件，需要联网
+efo <- getEFO() ## http://www.ebi.ac.uk/efo/efo.owl
+biotop <- getOntology("http://purl.org/biotop/biotop.owl")
+efo <- getOntology('efo.owl')
+
+
+## 列出这两个源文件里面的所有ontology记录
+getAllTerms(biotop)
+getAllTermIds(efo)
+ 
+##  
+term_efo <- getTermById(efo,"EFO_0000322")
+term_biotop <- getTermById(biotop,"DeadBody")
+getTermNameById(efo,"EFO_0000322")
+getTermNameById(biotop,"EmbryonicStructure")
+
+
+getAllTermParentsById(efo,"EFO_0000322")
+getAllTermChildrenById(biotop,"DeadBody")
+getAllTermParents(efo,term_efo)
+getAllTermChildren(biotop,term_biotop)
+
+getTermParentsById(efo,"EFO_0000322")
+getTermChildrenById(efo,"EFO_0000322")
+getTermParents(efo,term_efo)
+getTermChildren(biotop,term_biotop)
+
+showHierarchyDownToTermById(efo,"EFO_0000322")
+showHierarchyDownToTerm(efo,term_efo)
+
+
+getTermDefinitionsById(efo,"EFO_0000322")
+getTermSynonymsById(efo,"EFO_0000322")
+getTermDefinitions(efo,term_efo)
+getTermSynonyms(efo,term_efo)
+
+
+getOntologyAccession(efo)
+getOntologyDescription(efo)
+
+
+hasTerm(efo,"CL000023")
+hasTerm(efo,"EFO_0000322")
+
+
+searchTerm(efo,"thymus")
+searchTermPrefix(efo,"thym")
+
+isRootById(efo,"EFO_0000322")
+isRoot(efo,term_efo)
+getRoots(efo)
+getRootIds(efo)
+
+
+	
