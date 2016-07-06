@@ -75,6 +75,7 @@ http://bioinfo.vanderbilt.edu/zhanglab/lectures/AB2015_RNASeq_project.pptx
 
 
 
+2016年7月6日10:19:37
 others: 
 http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE40684
 http://sra.dbcls.jp/search/view/SRP015626
@@ -82,48 +83,60 @@ http://sra.dbcls.jp/search/view/SRP015626
 ChIP-seq guidelines and practices of the ENCODE and modENCODE consortia.  http://www.ncbi.nlm.nih.gov/pubmed/22955991
 
 
+非常重要的：The Encyclopedia of DNA Elements (ENCODE) consortium aims to identify all functional elements in the human genome sequence. These elements include genomic regions bound by transcription factors (TFs), ；http://v1.factorbook.org/mediawiki/index.php/Welcome_to_factorbook
+A benchmark of gene expression tissue-specificity metrics　
+中国人做得癌症大数据分析－原发性肺癌
+http://qgenomics.org/?p=897
+http://www.nature.com/ncomms/2015/151209/ncomms10131/full/ncomms10131.html
+很好的描述了什么是peaks： http://www.strand-ngs.com/features/chip-seq
+http://www.strand-ngs.com/support/documentation/introduction
 
-对一个GRanges对象，很容易就可以注释它在基因组的分布情况，用ChIPpeakAnno这个包：
-library(ChIPpeakAnno)
-a=read.table('tmp/NNpositions.txt',header = T,stringsAsFactors = F)
+描述CHIP-seq测序深度的要求：http://blog.genohub.com/calculating-coverage-needed-for-chip-seq/
+http://blog.genohub.com/wp-content/uploads/2014/11/chip-seq-peaks.jpg 
+http://1.bp.blogspot.com/-wH56JcC9kVc/UuF6pHiWe0I/AAAAAAAAA2g/I2HdHBEs36U/s1600/Selection_068.png 
+多个chip-seq数据如何综合分析： http://www.nature.com/neuro/journal/v17/n10/images/nn.3808-F1.jpg
 
-peaks=GRanges(seqnames = a$chr,
-              ranges=IRanges(
-                start = a$pos,
-                end = a$pos+1,
-                names = paste0('pos',1:length(a$pos))
-              ))
-###################################################
-if(require(TxDb.Hsapiens.UCSC.hg19.knownGene)){
-  aCR<-assignChromosomeRegion(peaks, nucleotideLevel=FALSE, 
-                              precedence=c("Promoters", "immediateDownstream", 
-                                           "fiveUTRs", "threeUTRs", 
-                                           "Exons", "Introns"), 
-                              TxDb=TxDb.Hsapiens.UCSC.hg19.knownGene)
-  barplot(aCR$percentage)
-}
-也可以用annotatePeakInBatch+addGeneIDs函数来对这些peaks坐标进行基因注释！ 
-data(TSS.human.GRCh37)  ## 主要是借助于这个GRanges对象来做注释，也可以用getAnnotation来获取其它GRanges对象来做注释
-## featureType	： TSS, miRNA, Exon, 5'UTR, 3'UTR, transcript or Exon plus UTR
-macs.anno <- annotatePeakInBatch(peaks, AnnotationData=TSS.human.GRCh37, 
-                                 output="overlapping", maxgap=5000L)
-但是其实该包最重要的功能是对两个GRanges对象进行找overlap
-library(ChIPpeakAnno)
-bed <- system.file("extdata", "MACS_output.bed", package="ChIPpeakAnno")
-gr1 <- toGRanges(bed, format="BED", header=FALSE) 
-## one can also try import from rtracklayer
-library(rtracklayer)
-gr1.import <- import(bed, format="BED")
-identical(start(gr1), start(gr1.import))
-gr1[1:2]
-gr1.import[1:2] #note the name slot is different from gr1
-gff <- system.file("extdata", "GFF_peaks.gff", package="ChIPpeakAnno")
-gr2 <- toGRanges(gff, format="GFF", header=FALSE, skip=3)
-ol <- findOverlapsOfPeaks(gr1, gr2)
-makeVennDiagram(ol)
-还可以用binOverFeature来根据特定的GRanges对象(通常是TSS)来画分布图
-## Distribution of aggregated peak scores or peak numbers around transcript start sites.
+一个完美的CHIP-seq数据的peak-calling例子图片： http://i.imgur.com/Ld3Gru6.jpg
 
+QuEST is a statistical software for analysis of ChIP-Seq data with data and analysis results visualization through UCSC Genome Browser.  http://www-hsc.usc.edu/~valouev/QuEST/QuEST.html
+peak calling 阈值的选择： http://www.nature.com/nprot/journal/v7/n1/fig_tab/nprot.2011.420_F2.html
+MeDIP-seq and histone modification ChIP-seq analysis  http://crazyhottommy.blogspot.com/2014/01/medip-seq-and-histone-modification-chip.html
+2011-review-CHIP-seq-high-quaility-data: http://www.nature.com/ni/journal/v12/n10/full/ni.2117.html?message-global=remove
+不同处理条件的CHIP-seq的差异peaks分析： http://www.slideshare.net/thefacultyl/diffreps-automated-chipseq-differential-analysis-package
+一个实际的CHIP-seq数据分析例子： http://www.biologie.ens.fr/~mthomas/other/chip-seq-training/
 
+full size of workflow for CHIP-seq : http://www.nature.com/nprot/journal/v7/n8/images/nprot.2012.088-F1.jpg
+CHIP-seq pipeline :　http://www.slideshare.net/COST-events/chipseq-data-analysis
+
+https://www.researchgate.net/profile/Yong_Zhang116/publication/257810603/figure/fig3/AS:297394181820429@1447915706828/Figure-4-Useful-QC-measures-for-ChIP-seq-peak-calling-A-The-average-PhastCons-score.png
+https://openi.nlm.nih.gov/imgs/512/126/3111485/PMC3111485_pgen.1001392.g002.png
+http://www.nature.com/ni/journal/v16/n10/images/ni.3249-SF5.jpg
+ChIP-Seq Peaks Over Chromosomes http://www.zymoresearch.com/media/images/land/services/chip-seq/2-Peaks%20Over%20Chromosomes.png 
+bPeaks: basic peak detection from ChIPseq data  http://bpeaks.gene-networks.net/getting-started/how-to-use-bpeaks/
+ChIP-seq analysis and gene expression profiling during IRF8-induced monocyte differentiation   http://www.bloodjournal.org/content/121/10/1839?sso-checked=true
+ChIP-seq big picture Combine high-throughput sequencing with Chromatin Immuno-precipitation to   http://slideplayer.com/slide/3385783/
+也可以可视化CHIP-seq的peaks结果EXPANDER (EXpression Analyzer and DisplayER) is a java-based tool for analysis of gene expression data.http://acgt.cs.tau.ac.il/expander/help/ver7.0Help/html/Input_Data_.htm
+2010-PeakAnalyzer-Genome-wide annotation of chromatin binding and modification loci http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2923140/
+ChIP-Seq analysis defines in vivo binding sites for WT1 in kidney development. http://www.nature.com/ncomms/2014/140717/ncomms5444/fig_tab/ncomms5444_F1.html 
+Transcription factor inference from ChIP-seq on pure and heterogeneous samples. http://www.nature.com/nbt/journal/v31/n7/fig_tab/nbt.2596_F6.html
+２０１４－A survey of motif finding Web tools for detecting 　　https://biologydirect.biomedcentral.com/articles/10.1186/1745-6150-9-4
+motif finding工具套件 ： http://meme-suite.org/  输入文件是fasta序列，需要对peaks进行转换： http://bedtools.readthedocs.io/en/latest/content/tools/getfasta.html
+A complete workflow for the analysis of full-size ChIP-seq (and similar) data sets using peak-motifs
+Comparison of B1H-RC to ChIP-seq results for 39 human C2H2-ZF proteins.  http://www.nature.com/nbt/journal/v33/n5/fig_tab/nbt.3128_F3.html
+gene-fusion 检查工具大全： https://www.biostars.org/p/45986/
+
+PICS (ChIP-seq): I don't think this is in Bioconductor yet: http://www.rglab.org/pics-probabilistic-inference-for-chip-seq/
+这个可以直接从BED文件来找motif： rGADEM (motif discovery): http://bioconductor.org/packages/devel/bioc/html/rGADEM.html  
+MotIV (motif validation): http://bioconductor.org/packages/devel/bioc/html/MotIV.html
+http://lgsun.grc.nia.nih.gov/CisFinder/
+http://bioinfo.cs.technion.ac.il/drim/
+http://www.ncbi.nlm.nih.gov/pubmed/20736340
+
+Hi. I searched some paper and saw they studied lncRNAs by polyA selected RNASeq library. Is that a reasonable way to do that? 
+As I saw in wiki: http://en.wikipedia.org/wiki/Long_non-coding_RNA, lncRNAs are not always with polyA. So if we use polyA selected RNASeq library to analyze, we will miss many lncRNAs, right?
+Another question, I found in UCSC table browser, there is a repository for human lncRNAs (lincRNA transcripts, about 30,000, in hg19 version), how I can know are the lncRNAs with polyA or not? 
+Further, the reason I asked this question is because I have some non-polyA RNASeq in several samples, and have polyA RNASeq in other samples, I doubt if I can compare the lncRNA expression between the different libraries. I know the design is not good, but they are only available resources.
+Thanks.
+Hi. Comparison would be very tricky between both library types. Especially because you have the chance that one of the two libaries is "more complex", meaning has more different transcripts expressed so all your RPKM values will be different. One thing you could check is just do a basic differential expression on the non-polyA and the polyA+ libraries and check what the top differentially expressed transcripts are. But in the end if you do differential expression between the libraries you will be always biased. You could make some kind of complex design with covariates but you potentially miss a lot of transcripts then
 
 
