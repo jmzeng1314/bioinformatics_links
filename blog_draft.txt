@@ -140,3 +140,214 @@ Thanks.
 Hi. Comparison would be very tricky between both library types. Especially because you have the chance that one of the two libaries is "more complex", meaning has more different transcripts expressed so all your RPKM values will be different. One thing you could check is just do a basic differential expression on the non-polyA and the polyA+ libraries and check what the top differentially expressed transcripts are. But in the end if you do differential expression between the libraries you will be always biased. You could make some kind of complex design with covariates but you potentially miss a lot of transcripts then
 
 
+
+
+
+2016-7-6 15:58:20
+
+EBI的identifiers.org系统，就是把其它数据库的链接统一了：
+http://identifiers.org/pubmed/16333295
+http://identifiers.org/taxonomy/9606
+http://identifiers.org/ec-code/1.1.1.1
+现有的数据库如下： http://www.ebi.ac.uk/miriam/main/collections/
+
+
+http://www.ebi.ac.uk/miriam/main/collections/MIR:00000012
+http://identifiers.org/pubmed/24243840  等价于  http://www.ncbi.nlm.nih.gov/pubmed/24243840
+http://identifiers.org/pubmed/22700311  等价于  http://www.ncbi.nlm.nih.gov/pubmed/22700311
+http://identifiers.org/kegg.pathway/hsa00620  等价于    http://www.kegg.jp/entry/hsa00620
+
+
+http://identifiers.org/reactome/
+http://www.reactome.org/PathwayBrowser/#R-HSA-201451
+
+miRNA target tools ： https://cm.jefferson.edu/rna22/Interactive/
+https://cm.jefferson.edu/rna22/Precomputed/OptionController?species=HomoSapiens&type=lncRNA&version=MB21E78v2
+
+台湾的科学杂志： http://highscope.ch.ntu.edu.tw/wordpress/
+專一性位置重組(Site-specific recombination)：免疫球蛋白(即抗體)輕、重鏈的DNA重組。由於輕鏈基因中具有V (Variable)、J (Joining)、C (Constant)區；重鏈則具有V、D (Diversity)、J、C區，除了C區以外，每區都包含多種基因節段，利用剪接重組方式形成各式的抗體基因，進而產生各式的抗體，而這些重組的方式都是屬於專一性位置重組。
+同源性重組(Homologous recombination)：
+轉位性重組(Transpositional recombination)：代表著基因可從原基因座「移動」(又稱為「跳躍」)至另一個基因座，有別於上述兩種方式，其重組基因不需具備同源或相似的特徵，因此，此重組方式亦稱為不合規則的重組(illegitimate recombination)。
+細胞週期(Cell cycle)是一連串有規律的步驟，使細胞成長，而後分裂為兩個子細胞。細胞週期可分為細胞生長期和有絲分裂期。細胞生長期(間期)可分成三個時期：(1)第一間期(Gap 1 (G1) phase)：是細胞生長的時期，此時細胞代謝活化，複製所需胞器以及一些細胞質的組成，以供下一階段複製染色體使用；(2)合成期(Synthesis (S) phase)：DNA進行複製的時期；(3)第二間期(Gap 2 (G2) phase)：此時細胞已具有兩倍的遺傳物質，並為有絲分裂期做準備。接著進入分裂期(Mitosis (M) phase)，進行核裂(染色體分離)和質裂(細胞質分裂)的階段。另外還有個G0 phase，為細胞離開細胞週期並且停止分裂的時期。
+
+生信培训：http://bioinformatics-core-shared-training.github.io/
+丁香园的生物信息学讨论板块： http://www.dxy.cn/bbs/board/73/447?order=2&tpg=89
+
+
+
+##　TXDB这个设计思想很好，测试数据也不错，就是UCSC的ID，几乎没有人会去用
+## 对 TxDb.Hsapiens.UCSC.hg19.lncRNAs 同理： 
+## https://bioconductor.org/packages/devel/bioc/vignettes/GenomicFeatures/inst/doc/GenomicFeatures.pdf
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+## The GenomicFeatures package uses TxDb objects to store transcript metadata.
+## TxDb objects have numerous accessors functions to allow such features to be
+## retrieved individually or grouped together in a way that reflects the underlying biology
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene #shorthand (for convenience)
+txdb
+columns(txdb)
+keytypes(txdb)
+## just like mySQL
+keys <- c("100033416", "100033417", "100033420")
+select(txdb, keys = keys, columns="TXNAME", keytype="GENEID")
+## returned 1:1 mapping between keys and columns
+cols <- c("TXNAME", "TXSTRAND", "TXCHROM","TXSTART","TXEND" )
+select(txdb, keys=keys, columns=cols, keytype="GENEID")
+
+library(org.Hs.eg.db)
+## contains mappings between Entrez Gene identifiers and UCSC "Known Gene" accession numbers
+as.list(head(org.Hs.egUCSCKG))
+
+## Perhaps the most common operations for a TxDb object is to retrieve the genomic coordinates or ranges for
+## exons, transcripts or coding sequences
+GR <- transcripts(txdb)
+GR <- transcripts(txdb, filter=list(tx_chrom = "chr15", tx_strand = "+"))
+EX <- exons(txdb)
+GRList <- transcriptsBy(txdb, by = "gene")
+GRList <- exonsBy(txdb, by = "tx")
+tx_ids <- names(GRList)
+head(select(txdb, keys=tx_ids, columns="TXNAME", keytype="TXID"))
+##　可以直接把GRanges对象转为普通的数据框
+exon_txdb=exons(txdb)
+genes_txdb=genes(txdb)
+tmp=as.data.frame(exon_txdb)
+## 共289970个外显子记录，长度共98759283bp，也就是98.5Mb的区域都是外显子，感觉有点不大对，毕竟真正的外显子也就三十多M的
+## 去NCBI里面拿到 consensus coding sequence (CCDS)下载文件： ftp://ftp.ncbi.nlm.nih.gov/pub/CCDS/current_human/
+## 外显子记录增加到了346493个，我再用单行命令计算长度，是56321786bp，这次只有56M了，还是有点大，所以应该是还有重复！
+## 需要精确统计：这次才是34729283bp，也就是约35M
+
+## return a GRangesList object grouped by transcript for introns, 5’ UTR’s, and 3’ UTR’s, respectively.
+length(intronsByTranscript(txdb))
+length(fiveUTRsByTranscript(txdb))
+length(threeUTRsByTranscript(txdb))
+
+还有很多函数
+strand(exon_txdb)返回外显子的正负链信息，要么在正链要么在负链
+mcols(exon_txdb)返回exon的id编号，1到27750个
+seqlengths(exon_txdb)返回每条染色体的长度信息
+names,length
+GRanges对象还有很多其它类型的操作，非常好玩的，split,shift,resize,flank,reduce,gaps,disjoin,coverage
+其它求交集并集和都可以用,union,intersect,setdiff,pintersect,psetdiff
+
+## 还可以获取我们的GRanges对象的序列
+## Getting the actual sequence data for transcript or CDS
+library(BSgenome.Hsapiens.UCSC.hg19)
+tx_seqs1 <- extractTranscriptSeqs(Hsapiens, TxDb.Hsapiens.UCSC.hg19.knownGene,
+                                  use.names=TRUE)
+
+cds_seqs <- extractTranscriptSeqs(Hsapiens,
+                                  cdsBy(txdb, by="tx", use.names=TRUE))
+translate(cds_seqs)
+## 参考： http://bioconductor.org/packages/devel/bioc/vignettes/GenomicRanges/inst/doc/GenomicRangesHOWTOs.pdf
+genome <- BSgenome.Hsapiens.UCSC.hg19
+threeUTR_seqs <- extractTranscriptSeqs(genome, threeUTR)
+fiveUTR_seqs <- extractTranscriptSeqs(genome, fiveUTR)
+cds_seqs <- extractTranscriptSeqs(genome, cds)
+
+
+各种ID需要注释： http://bioinformatics-core-shared-training.github.io/cruk-bioinf-sschool/Day3/annoAndViz.html#(25)
+
+2016年7月7日09:01:38 
+
+2000-A classification of tasks in bioinformatics ： http://bioinformatics.oxfordjournals.org/content/17/2/180.short
+2010-A survey of sequence alignment algorithms for next-generation sequencing： http://bib.oxfordjournals.org/content/11/5/473.short
+2008-A survey of visualization tools for biological network analysis：https://biodatamining.biomedcentral.com/articles/10.1186/1756-0381-1-12
+2010-a survey of web tools for searching biomedical literature-pubmend : http://database.oxfordjournals.org/content/2011/baq036.full
+2009-A survey of available tools and web servers for analysis of PPI : http://bib.oxfordjournals.org/content/10/3/217.short
+2009-rRNA database-improved alignments and new tools for rRNA analysis : http://nar.oxfordjournals.org/content/37/suppl_1/D141.short
+2013-Survey of MapReduce frame operation in bioinformatics : http://bib.oxfordjournals.org/content/early/2013/02/07/bib.bbs088.short
+2008-enrichment-tools-paths toward the comprehensive functional analysis of large gene lists :http://nar.oxfordjournals.org/content/37/1/1.short
+2013-InterProScan 5: genome-scale protein function classification :http://bioinformatics.oxfordjournals.org/content/30/9/1236.short
+2012-A Systematic Survey of Loss-of-Function Variants in Human Protein-Coding Genes : http://science.sciencemag.org/content/335/6070/823
+2013-A survey of error-correction methods for next-generation sequencing : http://bib.oxfordjournals.org/content/14/1/56.short
+2013-A survey of tools for the analysis of quantitative PCR (qPCR) data : http://www.sciencedirect.com/science/article/pii/S2214753514000059
+2012-Tools for mapping high-throughput sequencing data : http://bioinformatics.oxfordjournals.org/content/early/2012/10/11/bioinformatics.bts605.short
+2016-A Survey of Software and Hardware Approaches to Performing Read Alignment in Next Generation Sequencing： http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=7501834
+2016- A Survey of Bioinformatics Database and Software Usage through Mining the Literature ： http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0157989
+2014-Review of current methods, applications, and data management for the bioinformatics analysis of whole exome sequencing ： http://go.galegroup.com/ps/i.do?id=GALE%7CA384781048&sid=googleScholar&v=2.1&it=r&linkaccess=fulltext&issn=11769351&p=AONE&sw=w
+2014-Rich annotation of DNA sequencing variants by leveraging the Ensembl Variant Effect Predictor with plugins ：
+2016-A survey of the sorghum transcriptome using single-molecule long reads ： http://www.nature.com/ncomms/2016/160624/ncomms11706/full/ncomms11706.html
+2014-Web data extraction, applications and techniques: a survey：http://www.sciencedirect.com/science/article/pii/S0950705114002640
+2014-OMICtools: an informative directory for multi-omic data analysis ： http://database.oxfordjournals.org/content/2014/bau069.full
+2013-dbNSFP v2.0: A Database of Human Non-synonymous SNVs and Their Functional Predictions and Annotations ： http://onlinelibrary.wiley.com/doi/10.1002/humu.22376/full
+
+
+google scholar: sepsis+sequencing 
+
+draft genome sequence for bacteria 
+miRNA as biomarker for sepsis 
+key immuno-gene expression in sepsis 
+Histone Modification Patterns 
+16S rRNA Gene Sequencing Data
+A first case report for sepsis
+
+2015-Personalized Medicine for Sepsis:http://journals.lww.com/amjmedsci/Abstract/2015/11000/Personalized_Medicine_for_Sepsis.12.aspx
+2015-Expression Profile of MicroRNAs in Gram-Negative Bacterial Sepsis: http://journals.lww.com/shockjournal/Abstract/2015/02000/Expression_Profile_of_MicroRNAs_in_Gram_Negative.4.aspx
+2014- Review Neonatal sepsis. An old problem with new insights ： http://www.tandfonline.com/doi/abs/10.4161/viru.26906
+2015-Sepsis Induces Specific Changes in Histone Modification Patterns in Human Monocytes：http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0121748
+2014-review-Gene expression profiling in sepsis: timing, tissue, and translational considerations : http://www.sciencedirect.com/science/article/pii/S1471491414000082
+2014-Exome sequencing identifies a de novo SCN2A mutation in a patient : http://onlinelibrary.wiley.com/doi/10.1111/epi.12554/full
+2015-Comparison of the miRNome and piRNome of bovine blood and plasma by small RNA sequencing :http://link.springer.com/article/10.1007/s10529-015-1788-2
+2015-review-Use of miRNAs as Biomarkers in Sepsis :http://www.hindawi.com/journals/acp/2015/186716/abs/
+2016-Circulating MicroRNAs as Biomarkers for Sepsis :http://www.mdpi.com/1422-0067/17/1/78/htm
+2013-review-Future novel diagnostics for sepsis - a systems biology approach : http://ccforum.biomedcentral.com/articles/10.1186/cc12693
+2015-MicroRNA's are novel biomarkers in sepsis – A systematic review : http://www.sciencedirect.com/science/article/pii/S2210844014200517
+2015-Circulating microRNA-223 serum levels do not predict sepsis or survival in patients with critical illness : http://www.hindawi.com/journals/dm/2015/384208/abs/
+2014-An integrated transcriptome and expressed variant analysis of sepsis survival and death: https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-014-0111-5
+2016-Additional Draft Genome Sequences of Escherichia coli Strains Isolated from Septic Patients : http://genomea.asm.org/content/4/1/e01614-15.short
+2016-Draft Genome Sequence of Klebsiella pneumoniae UCD-JA29 Isolated from a Patient with Sepsis : http://genomea.asm.org/content/4/3/e00234-16.short
+
+Comparison of the miRNome and piRNome of bovine blood and plasma by small RNA
+sequencing. ... Small RNA sequencing, data evaluation, mapping and annotation.
+
+
+ChIPseek is annotating your file(s).
+This page will automatically refresh every 60 seconds.
+Alternatively, You may use the job ID: 1467869924.863 to visit ChIPseek latter.
+
+
+
+## Download and install CEAS    
+## http://liulab.dfci.harvard.edu/CEAS/download.html
+cd ~/biosoft
+mkdir CEAS  &&  cd CEAS 
+wget  http://liulab.dfci.harvard.edu/CEAS/src/CEAS-Package-1.0.2.tar.gz
+tar zxvf CEAS-Package-1.0.2.tar.gz
+cd  CEAS-Package-1.0.2
+python setup.py install --user 
+## http://liulab.dfci.harvard.edu/CEAS/usermanual.html
+ ~/.local/bin/ceas --help  
+cd ~/biosoft/CEAS 
+mkdir testData  &&  cd testData  
+## Human CD4T+ H3K36me3 ChIP-Seq data
+wget http://liulab.dfci.harvard.edu/CEAS/src/H3K36me3_MACS_pval1e-5_peaks.bed.zip 
+wget http://liulab.dfci.harvard.edu/CEAS/src/H3K36me3.wig.zip  
+#########################run CEAS in the default mode##########################
+$ ceas -g gdb -b bed -w wig
+where gdb, bed, and wig stands for a sqlite3 file with a gene annotation table and genome background annotation, a BED file with ChIP regions, and a WIG file with ChIP enrichment signal file, respectively.  
+#########################example for test data : ####################
+wget http://liulab.dfci.harvard.edu/CEAS/src/hg18.refGene.gz 
+
+300M May 20  2009 H3K36me3.wig
+ 68M May 20  2009 H3K36me3.wig.zip
+110K May 20  2009 H3K36me3_MACS_pval1e-5_peaks.bed
+ 43K May 20  2009 H3K36me3_MACS_pval1e-5_peaks.bed.zip
+ 11M Dec  2  2010 hg18.refGene
+
+~/.local/bin/ceas --name=H3K36me3_ceas --pf-res=20 \
+--gn-group-names='Top 10%,Bottom 10%' -g hg18.refGene -b H3K36me3_MACS_pval1e-5_peaks.bed -w H3K36me3.wig
+
+但是有个重点，如何获取wig文件： https://github.com/crazyhottommy/ChIP-seq-analysis
+
+GSM1278641	Xu_MUT_rep1_BAF155_MUT	SRR1042593
+GSM1278642	Xu_MUT_rep1_Input	SRR1042594
+
+samtools depth SRR1042593.sorted.bam | perl -ne 'BEGIN{ print "track type=print wiggle_0 name=SRR1042593 description=SRR1042593\n"}; ($c, $start, $depth) = split; if ($c ne $lastC) { print "variableStep chrom=$c span=10\n"; };$lastC=$c; next unless $. % 10 ==0;print "$start\t$depth\n" unless $depth<3' > SRR1042593.wig
+samtools depth SRR1042594.sorted.bam | perl -ne 'BEGIN{ print "track type=print wiggle_0 name=SRR1042594 description=SRR1042594\n"}; ($c, $start, $depth) = split; if ($c ne $lastC) { print "variableStep chrom=$c span=10\n"; };$lastC=$c; next unless $. % 10 ==0;print "$start\t$depth\n" unless $depth<3' > SRR1042594.wig
+
+
+mkdir annotation  &&  cd annotation  
+wget http://liulab.dfci.harvard.edu/CEAS/src/hg19.refGene.gz ; gunzip hg19.refGene.gz 
+
+~/.local/bin/ceas --name=H3K36me3_ceas --pf-res=20 --gn-group-names='Top 10%,Bottom 10%'  \
+-g hg19.refGene -b  ../paper_results/GSM1278641_Xu_MUT_rep1_BAF155_MUT.peaks.bed -w ../rawData/SRR1042593.wig 
+
