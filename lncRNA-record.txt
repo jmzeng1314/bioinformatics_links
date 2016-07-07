@@ -1,0 +1,341 @@
+写网页工具引用的人可真多： WEB-based GEne SeT AnaLysis Toolkit
+http://bioinfo.vanderbilt.edu/webgestalt/
+http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3692109/
+J Wang - ‎2013 - ‎被引用次数：375 - ‎相关文章
+
+
+You can easily download gencode annotation and filter genes transcripts according the number of exons.
+curl -s "ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_21/gencode.v21.long_noncoding_RNAs.gtf.gz" | 
+    gunzip -c | 
+    awk '($3=="exon") {print $12}' | 
+    sort | uniq -c | 
+    awk '($1 == 1) {print $2}' | head -n 5
+所有序列均可下载在The GENCODE v7 catalog of human long noncoding RNAs：
+paper: http://genome.cshlp.org/content/22/9/1775.full
+FTP地址：ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/ 
+GENCODE最新版是v24 ： wget -c -r -np -k -L -A "*metadata*" ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_24/ 
+检查里面的记录数： ls *gz |while read id;do (echo -n $id;echo -n "    " ;zcat $id |wc -l ) ;done
+可以与官网的统计信息相对应： http://www.gencodegenes.org/stats.html
+gencode.v24.metadata.Annotation_remark.gz    40879
+gencode.v24.metadata.EntrezGene.gz    170466
+gencode.v24.metadata.Exon_supporting_feature.gz    19193542
+gencode.v24.metadata.Gene_source.gz    66206
+gencode.v24.metadata.HGNC.gz    182831
+gencode.v24.metadata.PDB.gz    94547
+gencode.v24.metadata.PolyA_feature.gz    84652
+gencode.v24.metadata.Pubmed_id.gz    209094
+gencode.v24.metadata.RefSeq.gz    75365
+gencode.v24.metadata.Selenocysteine.gz    119
+gencode.v24.metadata.SwissProt.gz    45067
+gencode.v24.metadata.Transcript_source.gz    217202
+gencode.v24.metadata.Transcript_supporting_feature.gz    87375
+gencode.v24.metadata.TrEMBL.gz    61924
+
+还可以下载所有的gtf文件：
+wget -c -r -np -nd -k -L -A "*gtf.gz" ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_24/ 
+
+根据基因的ENSG系列ID，可以直接取http://exac.broadinstitute.org/gene/ENSG00000236915 查看信息
+
+还可以下载参考转录组及参考蛋白组，我这里还是拿hg19举例：
+## ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_24/GRCh37_mapping/gencode.v24lift37.transcripts.fa.gz
+## ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_24/GRCh37_mapping/gencode.v24lift37.lncRNA_transcripts.fa.gz 
+## ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_24/GRCh37_mapping/gencode.v24lift37.pc_transcripts.fa.gz
+
+
+还有一些其它组织维护的数据库：
+http://www.lncipedia.org/download
+http://genome.igib.res.in/lncRNome/
+
+
+芯片数据分析lncRNA： http://pubmedcentralcanada.ca/pmcc/articles/PMC3691033/
+Dr. Zhen-Yu Zhang, Department of Gastroenterology, Nanjing First Hospital, Nanjing Medical University
+
+Human exon arrays for gastric cancer and normal adjacent tissue were downloaded from the GEO. Two data sets were included: GSE27342 and GSE33335. 
+GSE27342 was used as an experimental set to discover differentially expressed lncRNAs in gastric cancer while GSE33335 was used as a validation set.
+GSE27342 consisted of 80 paired gastric cancer and normal adjacent tissue, including 4 stage I, 7 stage II, 54 stage III and 7 stage IV
+GSE33335 consisted of 25 paired gastric cancer and normal adjacent tissue obtained from the tissue bank of Shanghai Biochip Center, Shanghai, China
+
+The Affymetrix Human Exon 1.0 ST array consists of over 6.5 million individual probes designed along the entire length of the gene as opposed to just the 3’ end, 
+providing a unique platform for mining lncRNA profiles
+We identified 136053 probes from the Affymetrix Human Exon 1.0 ST array uniquely mapping to lncRNAs at the gene level.
+方法如下： 
+The probe sequences of the human exon array were downloaded from the Affymetrix website (http://www.affymetrix.com/Auth/analysis/downloads/na25/wtexon/HuEx-1_0-st-v2.probe.tab.zip) 
+and aligned to the sequences of protein-coding and non-coding transcripts using BLAST-2.2.26+
+
+These probes correspond to 9294 lncRNAs, covering nearly 76% of the GENCODE lncRNA data set.
+首先分析 GSE27342 数据，找差异的lncRNA (genome-scale transcriptomic analyses on 80 paired gastric cancer/reference tissues)
+The CEL files were processed by Affymetrix Power Tools for background correction, normalization, and summarizations with RMA algorithm
+Using LIMMA with an adjusted P-value of less than 0.01 as a threshold, we identified 88 lncRNAs(gastric cancer VS normal tissue)
+
+然后用 GSE33335 数据来做验证 (25 pairs of gastric tissues: gastric cancer tissues vs. matched adjacent noncancerous tissues.)
+To independently validate our results, we conducted the same analysis on GSE33335 and found that 59% of the differentially expressed lncRNAs identified by above analysis showed significant expression changes (adjusted P < 0.01) with the same direction. 
+
+http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE33335
+http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse27342
+
+pre-step:
+http://www.lncrnablog.com/
+
+step1:read paper and get the workflow for lncRNA anlaysis 
+## http://www.sciencedirect.com/science/article/pii/S1934590913000982
+## Integration of Genome-wide Approaches Identifies lncRNAs of Adult Neural Stem Cells and Their Progeny In Vivo
+We utilize complementary genome-wide techniques including RNA-seq, RNA CaptureSeq, and ChIP-seq to associate specific lncRNAs with neural cell types, developmental processes, and human disease states. 
+By integrating data from chromatin state maps, custom microarrays, and FACS purification of the subventricular zone lineage, we stringently identify lncRNAs with potential roles in adult neurogenesis.
+
+
+Advances in RNA-Seq have opened the way to unbiased and efficient assays of the transcriptome of any mammalian cell
+Recent studies in mouse and human cells have mostly focused on using RNA-Seq to study known genes
+and have depended on existing annotations. 
+They were thus of limited utility for discovering the complete gene structure of lincRNAs or other noncoding transcripts.
+
+Because lncRNAs exhibit tissue-specific expression,
+previous mouse lncRNA databases
+were not likely comprehensive for lncRNAs involved in adult neurogenesis.
+
+employing an RNA-seq and ab initio transcriptome reconstruction approach
+对下面3种组织或者细胞系进行RNA-seq，然后用Cufflinks来分析数据
+SVZ (229 million reads),
+OB (248 million reads), 
+DG (157 million reads).
+还利用了2个公共数据(GSE20851)To broaden our lncRNA catalog, we also include
+embryonic stem cells (ESCs)
+ESC-derived neural progenitors cells (ESC-NPCs)
+公共数据来自于：
+共计800M的reads
+With this collection of over 800 million paired-end reads, we used Cufflinks to perfom ab initio transcript assembly.
+
+paper:2010-Ab initio reconstruction of cell type-specific transcriptomes in mouse reveals the conserved multi-exonic structure of lincRNAs
+
+protein-coding genes 的转录本重合度非常好,93% 
+但是lncRNA找到了非常多的全新的，本次总共找到 8,992 lncRNAs encoded from 5,731 loci
+There were
+6,876 (76.5%) novel ones compared to RefSeq genes, 5,044
+(56.1%) were novel compared to UCSC known genes, and
+3,680 (40.9%) were novel compared to all Ensembl genes.
+
+Interestingly,
+2,108 transcripts (23.4%) were uniquely recovered from
+our SVZ/OB/DG reads.
+而且用coding potential calculator来验证我们找到的lncRNAs中，有80%的确没有ORF
+lncRNAs were expressed at lower levels than protein-coding genes (2.49-fold difference;
+their exons were less strongly conserved than protein-coding exons by PhastCons scores
+部分lncRNA的转录起始位点跟临近的蛋白编码基因的起始位置距离太近了：the TSS of 2,265 lncRNAs (25.2%) in our catalog were located within 5 kb of a protein-coding gene promoter
+对这些基因进行GO分析，发现它们包含着homedomain的转录因子，脑组织特异性表达基因，还有被Polycomb repressive complex 2 抑制的基因
+
+也有一部分lncRNA跟它临近的蛋白编码基因的表达量相关性很高！
+
+Differential
+gene expression identified 1,621 genes enriched >2-fold in the
+SVZ cDNA library as compared to the cDNAs from cells in the
+adjacent nonneurogenic striatum (76.4 million reads).
+
+接下来做了6种区域的lncRNA 芯片数据了,来自于另一篇文章：GSE45282 
+To explore lncRNA expression patterns in multiple adult brain regions and embryonic forebrain development,
+adult cortex
+adult whole prefrontal cortex (PFC)
+adult preoptic
+area (POA)
+whole embryonic day 15 (E15) brain 
+specific regions of the developing E14.5 cortex (ventricular zone, intermediate zone, and cortical plate)
+对表达量的距离分析表明：region-specific and temporally related expression of both mRNAs and lncRNAs
+
+文章还挖掘了22个公共数据：Using RNA-seq data from 22 samples , we constructed transcript coexpression networks comprised of both mRNAs and lncRNAs.
+
+因为本文发现的新的lncRNA没有前人研究注释过，所以作者采用了RNA CaptureSeq Verifies SVZ lncRNA Expression and Identifies Novel Splice Isoforms来验证
+RNA CaptureSeq probe library, we tiled across 100 MB of putative lncRNA loci and 30 MB of protein-coding regions as a control.
+结果又新发现了rare lncRNAs 和 uncommon splice isoforms 在SVZ 的转录组里面 yielding more than 3,500 lncRNAs that could not be detected by the short-read sequencing technology
+A complete annotation of CaptureSeq-derived transcripts is available at http://neurosurgery.ucsf.edu/danlimlab/lncRNA.
+
+作者还研究了Correlation between Histone Modifications and lncRNA Expression
+Our analysis of chromatin state maps and transcript expression suggest that histone modifications correlate with lncRNA expression in a manner similar to that of protein-coding genes.
+
+All data are deposited in NCBI GEO under accession number GSE45282.
+
+library strategy: RNA CaptureSeq
+Reads aligned using BLAT
+Newbler 2.6 used for de novo assembly of transcriptome
+FPKM values calculated using RSEM included in the Trinity package
+Genome_build: mm9
+
+step2:download the raw data from NCBI-GEO-SRA database
+## http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE45282
+cd ~ 
+mkdir lncRNA_test
+cd lncRNA_test
+mkdir paper_results
+cd    paper_results
+wget ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1100nnn/GSM1100702/suppl/GSM1100702_CaptureSeq_isotigs.tsv.gz
+wget ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1100nnn/GSM1100702/suppl/GSM1100702_target_regions.bed.gz
+
+
+# RNA-seq     GSE45278 10个sra文件： ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP019/SRP019780
+## SRR786689~SRR786698  ##数据总结见：　http://www.ncbi.nlm.nih.gov/sra/?term=SRP019780
+####################### 样本来源：####################### ####################### 
+RNA-seq (both paired end and single) 
+adult neurogenic niches- subventricular zone (SVZ) 
+olfactory bulb (OB)  
+dentate gyrus (DG) 
+control non-neurogenic tissue, striatum (STR) 
+####################### ####################### ####################### 
+#####RNA-seq数据还整合了一个公共数据，也需要下载： http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE20851
+#####数据量有点大：ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP002/SRP002325
+
+####################### 根据上面RNA-seq数据分析的结果
+# SVZ Capture GSE45277 10个sra文件： ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX252/SRX252176
+## SRR786699~SRR786708　　## 就一个样本： http://www.ncbi.nlm.nih.gov/sra/?term=SRX252176
+
+step3:quality control for the sequence data  
+## paper:2012- analysis of RNA-seq experiments with TopHat and Cufflinks : http://www.nature.com/nprot/journal/v7/n3/full/nprot.2012.016.html
+
+## 作者用的是tophat2+cufflinks+CummeRbund 我这里替换成HISAT+StringTie+ballgown
+## https://speakerdeck.com/stephenturner/rna-seq-qc-and-data-analysis-using-the-tuxedo-suite
+## pre-step:  install software: tophat2+cufflinks,HISAT+StringTie+ballgown,mm9  
+### also :  kallisto+Sailfish +salmon 
+
+## Download and install tophat2
+## http://www.ccb.jhu.edu/software/tophat/index.shtml   ## http://www.ccb.jhu.edu/software/tophat/manual.shtml
+cd ~/biosoft
+mkdir tophat2 &&  cd tophat2 
+wget http://www.ccb.jhu.edu/software/tophat/downloads/tophat-2.1.1.Linux_x86_64.tar.gz 
+tar zxvf  
+
+## Download and install cufflinks
+## http://cole-trapnell-lab.github.io/cufflinks/  ## http://cole-trapnell-lab.github.io/cufflinks/install/
+cd ~/biosoft
+mkdir cufflinks &&  cd cufflinks 
+wget http://cole-trapnell-lab.github.io/cufflinks/assets/downloads/cufflinks-2.2.1.Linux_x86_64.tar.gz 
+tar zxvf  
+
+## Download and install HISAT
+## http://ccb.jhu.edu/software/hisat2/index.shtml　　##http://ccb.jhu.edu/software/hisat2/manual.shtml
+
+cd ~/biosoft
+mkdir HISAT &&  cd HISAT 
+wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.0.4-Linux_x86_64.zip
+tar zxvf  
+
+## Download and install StringTie
+## https://ccb.jhu.edu/software/stringtie/  ## https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual
+cd ~/biosoft
+mkdir StringTie &&  cd StringTie 
+wget http://ccb.jhu.edu/software/stringtie/dl/stringtie-1.2.3.Linux_x86_64.tar.gz 
+tar zxvf  
+
+## CummeRbund  ballgown  ( R - bioconductor packges: )
+## http://compbio.mit.edu/cummeRbund/
+## https://github.com/alyssafrazee/ballgown
+source("http://bioconductor.org/biocLite.R")
+biocLite("ballgown")
+biocLite("CummeRbund")
+
+##　RSEM+HTseq+Bedtools 　https://github.com/bli25ucb/RSEM_tutorial　　　
+##　RNA-Seq transcript quantification program without alignment : kallisto+Sailfish +salmon
+## reference transcripts 需要自行下载 
+## ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_24/GRCh37_mapping/gencode.v24lift37.transcripts.fa.gz
+## ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_24/GRCh37_mapping/gencode.v24lift37.lncRNA_transcripts.fa.gz 
+## ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_24/GRCh37_mapping/gencode.v24lift37.pc_transcripts.fa.gz
+## a FASTA file containing your reference transcripts and a (set of) FASTA/FASTQ file(s) containing your reads  
+## Download and install kallisto
+## https://pachterlab.github.io/kallisto/starting
+cd ~/biosoft
+mkdir StringTie &&  cd kallisto 
+wget https://github.com/pachterlab/kallisto/releases/download/v0.43.0/kallisto_linux-v0.43.0.tar.gz
+tar zxvf  
+
+## Download and install Sailfish
+## http://www.cs.cmu.edu/~ckingsf/software/sailfish/  ## 
+cd ~/biosoft
+mkdir Sailfish &&  cd Sailfish 
+wget   https://github.com/kingsfordgroup/sailfish/releases/download/v0.9.2/SailfishBeta-0.9.2_DebianSqueeze.tar.gz 
+tar zxvf  
+
+## Download and install salmon
+## http://salmon.readthedocs.io/en/latest/salmon.html ## 
+cd ~/biosoft
+mkdir salmon &&  cd salmon 
+## https://github.com/COMBINE-lab/salmon
+tar zxvf  
+
+## Download and install bowtie
+cd ~/biosoft
+mkdir bowtie &&  cd bowtie
+wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.9/bowtie2-2.2.9-linux-x86_64.zip/download
+#Length: 27073243 (26M) [application/octet-stream]
+#Saving to: "download"   ## I made a mistake here for downloading the bowtie2 
+mv download  bowtie2-2.2.9-linux-x86_64.zip
+unzip bowtie2-2.2.9-linux-x86_64.zip
+ 
+mkdir -p ~/biosoft/bowtie/hg19_index 
+cd ~/biosoft/bowtie/hg19_index
+
+# download hg19 chromosome fasta files
+wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/chromFa.tar.gz
+# unzip and concatenate chromosome and contig fasta files
+tar zvfx chromFa.tar.gz
+cat *.fa > hg19.fa
+rm chr*.fa
+##  ~/biosoft/bowtie/bowtie2-2.2.9/bowtie2-build  ~/biosoft/bowtie/hg19_index/hg19.fa  ~/biosoft/bowtie/hg19_index/hg19
+
+
+step4:mapping the reads to reference genome/transcriptome 
+
+step5: de nove identification lncRNA
+paper:Genome-wide computational identification and manual annotation  of human long noncoding RNA genes :http://rnajournal.cshlp.org/content/16/8/1478.short
+paper:A complete annotation of CaptureSeq-derived transcripts is available at http://neurosurgery.ucsf.edu/danlimlab/lncRNA.
+
+
+step6:counts the expression lever for each LncRNA
+
+step7:find the differentially expressed  LncRNA  
+
+step8: function anlaysis for the lncRNA 
+paper:2016-Discovery and functional analysis of lncRNAs:  http://www.sciencedirect.com/science/article/pii/S1874939915002163 
+paper:2014-Genome-wide screening and functional analysis identify a large number of long noncoding RNAs involved in the sexual reproduction of rice:  https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0512-1
+Introduction: sequence-->expression-->function: http://www.exiqon.com/lncrna
+paper:2014-lncRNAtor-a comprehensive resource for functional investigation of long noncoding RNAs:http://lncrnator.ewha.ac.kr/index.htm
+paper:2014-Genome-Wide Analysis of Long Noncoding RNA (lncRNA) Expression in Hepatoblastoma Tissues : http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0085599
+paper:2015- Predicting the Functions of Long Noncoding RNAs Using RNA-Seq Based on Bayesian Network: http://www.hindawi.com/journals/bmri/2015/839590/
+paper:2016-Long Non-coding RNA in Neurons: New Players in Early Response to BDNF Stimulation : http://journal.frontiersin.org/article/10.3389/fnmol.2016.00015/full
+Figure 7: GO analysis of the biological function of lncRNA: http://www.nature.com/articles/srep21499/figures/7
+Figure 2. GO enrichment analysis of lncRNA targets. GO annotations of lncRNA targets categorized by (A) biological process, (B) cell component and (C) molecular function. :https://www.spandidos-publications.com/or/31/4/1613  ## http://www.oatext.com/Genome-wide-analysis-of-differentially-expressed-long-noncoding-RNAs-induced-by-low-shear-stress-in-human-umbilical-vein-endothelial-cells.php
+Figure 3. Functional classification of lncRNA  : https://www.spandidos-publications.com/ijo/45/2/619
+paper:2016-Expression profiles of long-noncoding RNAs in cutaneous squamous cell carcinoma. : http://www.futuremedicine.com/doi/abs/10.2217/epi-2015-0012
+
+step9:lncRNA-mRNA co-expression network  
+
+paper:2015-biomarkers-OV-Comprehensive analysis of lncRNA-mRNA co-expression patterns: http://www.nature.com/articles/srep17683
+paper:2016-Differential lncRNA-mRNA co-expression network analysis : http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4732855/
+paper:2014-Microarray Profiling and Co-Expression Network Analysis of Circulating lncRNAs and mRNAs :http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0093388
+paper:2014-Long Noncoding RNA-EBIC Promotes Tumor Cell Invasion by Binding to EZH2 and Repressing E-Cadherin in Cervical Cancer : https://figshare.com/articles/_lncRNA_mRNA_co_expression_network_/1098837
+paper:2016-Microarray Analysis of lncRNA and mRNA Expression Profiles in Patients with Neuromyelitis Optica : http://link.springer.com/article/10.1007/s12035-016-9754-0
+paper:2015-LncRNA expression profiles reveal the co-expression network in human colorectal carcinoma  : http://www.ijcep.com/files/ijcep0017983.pdf
+
+
+
+
+step10: analysis of lncRNA-miRNA interactions
+
+paper:2014-starBase-decoding miRNA-ceRNA, miRNA-ncRNA and protein–RNA interaction networks from large-scale CLIP-Seq data : http://nar.oxfordjournals.org/content/early/2013/11/30/nar.gkt1248.short
+paper:2014-An Integrated Analysis of miRNA, lncRNA, and mRNA Expression Profiles : http://www.hindawi.com/journals/bmri/2014/345605/abs/
+paper:2013-Systematic transcriptome wide analysis of lncRNA-miRNA interactions  : http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0053823
+Figure: Regulatory cancer network of lncRNA-miRNA interactions. : http://www.aimspress.com/article/10.3934/molsci.2016.2.104/fulltext.html
+paper:2014-Functional interactions among microRNAs and long noncoding RNAs :http://www.sciencedirect.com/science/article/pii/S1084952114001700
+paper:2014-NPInter v2.0-an updated database of ncRNA interactions: http://nar.oxfordjournals.org/content/42/D1/D104.short
+paper:2013-Long Noncoding RNAs-Related Diseases, Cancers, and Drugs: http://www.hindawi.com/journals/tswj/2013/943539/abs/
+
+step11:  Histone Modifications and lncRNA Expression
+paper:2013-Panning for Long Noncoding RNAs : http://www.mdpi.com/2218-273X/3/1/226/htm
+
+
+2015-Analysis of long non-coding RNAs highlights tissue-specific expression patterns and epigenetic profiles in normal and psoriatic skin : https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0570-4
+2013-Predicting long non-coding RNAs using RNA sequencing : http://www.ncbi.nlm.nih.gov/pubmed/23541739
+2014-Identification of prostate cancer LncRNAs by RNA-Seq ： http://www.ncbi.nlm.nih.gov/pubmed/25422238
+book: Identification of Disease-Related Genes by NGS: http://www.diss.fu-berlin.de/diss/servlets/MCRFileNodeServlet/FUDISS_derivate_000000015470/Dorn_Cornelia.diss2.pdf
+book: yeast function genomic : http://download.springer.com/static/pdf/150/bok%253A978-1-4939-3079-1.pdf?originUrl=http%3A%2F%2Flink.springer.com%2Fbook%2F10.1007%2F978-1-4939-3079-1&token2=exp=1467776101~acl=%2Fstatic%2Fpdf%2F150%2Fbok%25253A978-1-4939-3079-1.pdf%3ForiginUrl%3Dhttp%253A%252F%252Flink.springer.com%252Fbook%252F10.1007%252F978-1-4939-3079-1*~hmac=4aaa3f402c498fffa9c609d6ab14c14c0eba3b7862a526ecfddf30c0cf7fb81f
+RNA-seq workflow tophat+cufflinks+R: https://s3-eu-west-1.amazonaws.com/pfigshare-u-files/1100005/20130522GACDRNASeqandMethylation.pdf
+
+mRNA and ncRNA (miRNA, lncRNA, snoRNA, etc) 
+Quantitative gene profiling of long noncoding RNAs with targeted RNA sequencing  : http://www.nature.com/nmeth/journal/v12/n4/full/nmeth.3321.html 
+Targeted RNA sequencing reveals the deep complexity of the human transcriptome	http://cole-trapnell-lab.github.io/pdfs/papers/mercer-capture-seq.pdf
+Targeted sequencing for gene discovery and quantification using RNA CaptureSeq http://www.ncbi.nlm.nih.gov/pubmed/24705597
+2011年 RNA CaptureSeq技术出现 ： http://www.ebiotrade.com/newsf/2011-11/20111117145845614.htm
