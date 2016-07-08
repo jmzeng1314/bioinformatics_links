@@ -1,0 +1,34 @@
+Identify somatic mutations in cancer exome without a matched pair
+Hello,
+Does anyone know of an acceptable workflow/pipeline for processing cancer exome data without a matched normal?  I understand that without the normal, we won't be able to distinguish between germline and somatic mutations with 100% certainty.  Even so, I would like to process our data.  I have already prepped my data using the steps outlined GATK best practices (align, sort, remove dups, index, indel realign, base recalibration).  What is the next step (software, analysis, etc)?
+Thanks for your help!
+FYI, while I was searching for answers I came across this post:
+Discrimination Between Germline And Somatic Mutations In Tumor Without The Availability Of The Normal Paired Sample
+There is some useful info here.  However, it is from almost 2 years ago.  I am wondering if there is a more updated, streamlined process?
+Thanks.
+I have been working on something similar (using genomes).
+Here is what I've learned so far:
+-This is unfortunately more difficult than I originally hoped.   For example, general knowledge is that variants found in COSMIC will be somatic in other samples, when in practice I've flagged many variants as somatic for that reason, only to find later that they are germline.   One metric that I've found relatively useful when comparing against COSMIC is to limit the trustworthy somatic calls to those that are identified in a minimum number of studies (there are lots that are found in only 1 study).   However, the business of using a database of somatic calls to select the somatic calls from a germline set has not been very successful for me.
+-Filtering out all the variants listed in dbSNP 144 (the latest on hg19) is very helpful.   This release now includes data from 1000 genomes as well as ExAC -> all rich germline data sets.   In my experience you need to be careful filtering out all variants seen in ExAC, and its better to not filter some that are at really low frequencies.
+-Be careful with the dbSNP filtering.   There are many real somatic variants in there.  For example, it seems all somatic variants found in COLO-829 have been flagged as somatic in dbSNP (using the SAO field).  Unfortunately, somatic variants found outside of published cell lines are not as likely to be marked as somatic in dbSNP.   In fact I did my initial testing using COLO-829 only to learn later that although dbSNP is so precise with its somatic annotations of COLO-829 variants, it it very hit or miss (mostly miss) for somatic variants identified in real cancer samples.
+-Be careful with over filtering.   I have found that the germline filtering works relatively well, but there are many cases where a known hotspot mutation (PI3KCA, or BRCA2, for example) is listed in dbSNP and not marked as somatic. 
+Throwing everything together I'm able to get about 80% sensitivity and 20% specificity in classifying a set of  (coding) variants as germline or somatic.
+Since you are asking about cell lines, maybe these have already been sequenced. There are bigger studies I'm aware of:
+1.	Cancer Cell Line Encyclopedia (CCLE), see http://www.ncbi.nlm.nih.gov/pubmed/22460905
+Browse and download the data: http://www.broadinstitute.org/ccle/home
+2.	NCI-60 cell line, see e.g. here: http://www.cbioportal.org/public-portal/study.do?cancer_study_id=cellline_nci60
+Then I would check against COSMIC for known somatic mutations. And maybe the cell line in question even has data in COSMIC, see By Sample at http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/ 
+Yes, I would also say it's close to impossible to distinguish between novel somatic and private or rare germline variants that are not dbSNP/1000genomes/ESP6500. Looking at both mutation allele frequency and copy number at that position might help for cases where a somatic mutation occurred after a copy number change, but it's still rather guessing than identifying. 
+Here is what I do:
+1.	Flag known germline variants by looking in dbSNP. I use a subset of dbSNP (> 1% minor allele frequency, mapping only once to reference assembly, and not flagged as "clinically associated"). You can get such a file for ANNOVAR (database name is snp137NonFlagged for the current dbSNP build), seehttp://www.openbioinformatics.org/annovar/annovar_download.html
+2.	Flag known somatic variants by looking in COSMIC. This usually finds well-described hotspot mutations (such as activating KRAS mutations), but overall will not find most of your true somatic variants (my guess). I usually take the whole of COSMIC, irrespective of tumor type.
+3.	Add other cancer sequencing studies (e.g. TCGA), as many of these are not yet in COSMIC currently. For TCGA, I use the MAF files available at https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/. Level 3 MAF files contain experimentally validated somatic mutations only. Level 2 MAF files contain also the unvalidated ones (and can contain germline variants).
+4.	Look at the variant allele frequency. If it's 100%, i.e. all reads show the variant, it's very likely germline (unless your tumor sample is 100% tumor cells and all tumor cells have the mutation). If it's below 10%, it can well be an artifact, see e.g.http://www.ncbi.nlm.nih.gov/pubmed/23303777
+5.	Check how all of the mismatches in your data (non-reference bases in the alignment) are distributed along the reads from 5' to 3'. If you have a much higher mismatch rate at the first/last bases of your reads, you might want to exclude these read positions.
+6.	Filter your variant list further, as it will likely contain a considerable amount of false positives. Table 1 of the VarScan paperhttp://www.ncbi.nlm.nih.gov/pubmed/22300766 is a good start (read pos, strand, variant read number and frequency, distance to 3', homopolymer, map quality and read length difference).
+7.	Looking at already known cancer mutation is fine, but you can tell only about what it is already known.
+8.	Personally, I would look at frequency of mutations. If it is germline it is either 100% or 50% (clearly, not exactly50%, but around there).
+9.	If it is a somatic mutation and your samples are from clinical samples (not cell lines), then infiltration with normal cells is inevitable and your mutations will be at 30-40%
+10.	If coverage is enough, you might confidently distinguish between the two.
+11.	To better understan what I mean, I suggest you this great paper
+
