@@ -1,0 +1,186 @@
+Public mutation data
+ 
+almost all variant callers (SamTools, SOAPSNP, SOLiD BioScope, Illumina CASAVA, CG ASM-var, CG ASM-masterVAR, etc) use a different file format for output files, Later on, VCF (Variant Call Format) becomes the main stream format for describing variants. It was originally developed and used by the 1000 Genomes Project, but its specification and extension is currently handled by the Global Alliance for Genomics and Health Data Working group. See here for details on its format specification.
+Ref: http://annovar.openbioinformatics.org/en/latest/articles/VCF/ 
+	samples	records	info			
+CGI69	69	27,603,800	AF,AC,AN,POS			
+ESP6500	6500	1,992,006	AF,AR,POS,SVM			
+ExAC-0.3	60,706	9,865,276	AF,AC,AN,HOM,HET,HEMI			
+1000ph3v5		39,728,373	AF,AR,POS,SNPSOURCE			
+ICGC-r18		12,647,641	CN,RA(cancer type)			
+Hapmap-v3		1,462,978	AF,AR,POS,			
+Dbsnp144		146,638,225				
+Cosmic-v74		2,153,353				
+
+CGI69
+是CG公司测了69个人后注释的VCF信息，注释信息就是标准的AF,AC,AN,POS
+##fileformat=VCFv4.0
+##INFO=<ID=CGI69_NS,Number=1,Type=Integer,Description="Complete Genomics 69 Public Genomes, number of samples with fully called data">
+##INFO=<ID=CGI69_AF,Number=1,Type=Integer,Description="Complete Genomics 69 Public Genomes, allele frequency. A value L if the total allele called is < 30.">
+##INFO=<ID=CGI69_AC,Number=1,Type=Integer,Description="Complete Genomics 69 Public Genomes, allele count">
+##INFO=<ID=CGI69_AN,Number=1,Type=Integer,Description="Complete Genomics 69 Public Genomes, total allele called">
+##INFO=<ID=CGI69_POS,Number=0,Type=Flag,Description="Complete Genomics 69 Public Genomes, flag for matching the position and the reference allele but not the alternative allele">
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO
+chr1    11014   .       G       A       .       .       CGI69_NS=0;CGI69_AC=1;CGI69_AN=1;CGI69_AF=L
+chr1    11022   .       G       A       .       .       CGI69_NS=3;CGI69_AC=1;CGI69_AN=7;CGI69_AF=L
+chr1    11075   .       A       G       .       .       CGI69_NS=0;CGI69_AC=1;CGI69_AN=1;CGI69_AF=L
+此数据是CG公司用自己的测序仪测了69个人 (69 standard, non-diseased samples) ，公布的vcf数据，共涉及道2760,3800位点。
+ftp://ftp2.completegenomics.com/ 
+http://www.completegenomics.com/public-data/ 
+http://www.completegenomics.com/public-data/69-Genomes/
+ESP6500
+NHLBI 
+Exome Sequencing Project (ESP)
+Exome Variant Server(EVS)
+The current version dataset is comprised of a set of 2203 African-Americans and 4300 European-Americans unrelated individuals, totaling 6503 samples 
+The samples included in the ESP6500 were selected from the populations listed on the "Home" tab. Information about these populations can be found through dbGaP. In general, ESP samples were selected to contain controls, the extremes of specific traits (LDL and blood pressure), and specific diseases (early onset myocardial infarction and early onset stroke), and lung diseases. Cohort or phenotype information about any particular individual CAN NOT BE RELEASED. The goal of the ESP dataset is to release the frequency counts of specific variants without regard to phenotype. 
+None of the INDEL calls was validated, In general, the INDEL calls are less robust than the SNP calls and have a higher false positive rate. When applying the ESP data to research studies, users are advised to keep this difference in mind. 
+All SNP data were called simultaneously at the University of Michigan (Abecasis Laboratory). The Michigan SNP calling pipeline is available here.
+All INDEL data were analyzed at the Broad Institute (by the Genome Sequencing and Analysis group) using the GATK variation discovery pipeline following the guidelines in the GATK best practices v4. 
+下载的vcf文件中涉及到的位点不多，就1992006个，注释信息是AF和AR(AR=AC/AN)，POS，多了一个SVM，而且还区分了两个人种。
+##fileformat=VCFv4.0
+##INFO=<ID=EVS_AF,Number=1,Type=Float,Description="Exome Variant Server ESP6500-SIv2, allele frequency = allele count / total allele">
+##INFO=<ID=EVS_AR,Number=.,Type=String,Description="Exome Variant Server ESP6500-SIv2, allele ratio defined as allele count : total allele">
+##INFO=<ID=EVS_POS,Number=0,Type=Flag,Description="Exome Variant Server ESP6500-SIv2, flag for matching the position and the reference allele but not the alternative allele">
+##INFO=<ID=EVS_SVM,Number=0,Type=Flag,Description="Exome Variant Server ESP6500-SIv2, flag for failed SVM-based filter at threshold 0.3 (detailed http://evs.gs.washington.edu/EVS/HelpDescriptions.jsp?tab=SnpHelpTab#FilterStatus)">
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO
+chr1    69428   .       T       G       .       .       EVS_AF=0.0306;EVS_AR=327:10670;EVS_EA_AR=313:6848;EVS_AA_AR=14:3822;EVS_AA_AF=0.0037;EVS_EA_AF=0.0457
+chr1    69476   .       T       C       .       .       EVS_AF=0.0002;EVS_AR=2:10930;EVS_EA_AR=2:7022;EVS_AA_AR=0:3908;EVS_AA_AF=0.0000;EVS_EA_AF=0.0003
+Links: http://evs.gs.washington.edu/EVS/
+ExAC
+包括了60,706 unrelated individuals(包括了ESP6500)，突变数据共有9865276条记录。记录的注释信息有AF,AC,AN,HOM,HET,HEMI
+Hemizygous/ homozygous/ heterozygous
+其中每个注释信息还又区分了人种，所以注释变的非常长了。
+ 
+EXAC_OTH_AC=0;EXAC_OTH_AN=116;EXAC_OTH_AF=0.000000;EXAC_OTH_HOM=0;EXAC_OTH_HET=0;EXAC_OTH_HEMI=0;EXAC_AMR_AC=0;EXAC_AMR_AN=102;EXAC_AMR_AF=0.000000;EXAC_AMR_HOM=0;EXAC_AMR_HET=0;EXAC_AMR_HEMI=0;EXAC_SAS_AC=0;EXAC_SAS_AN=6626;EXAC_SAS_AF=0.000000;EXAC_SAS_HOM=0;EXAC_SAS_HET=0;EXAC_SAS_HEMI=0;EXAC_AC=5;EXAC_AN=9922;EXAC_AF=0.000504;EXAC_HOM=0;EXAC_HET=5;EXAC_HEMI=0;EXAC_EAS_AC=0;EXAC_EAS_AN=148;EXAC_EAS_AF=0.000000;EXAC_EAS_HOM=0;EXAC_EAS_HET=0;EXAC_EAS_HEMI=0;EXAC_AFR_AC=0;EXAC_AFR_AN=414;EXAC_AFR_AF=0.000000;EXAC_AFR_HOM=0;EXAC_AFR_HET=0;EXAC_AFR_HEMI=0;EXAC_NFE_AC=5;EXAC_NFE_AN=2510;EXAC_NFE_AF=0.001992;EXAC_NFE_HOM=0;EXAC_NFE_HET=5;EXAC_NFE_HEMI=0;EXAC_FIN_AC=0;EXAC_FIN_AN=6;EXAC_FIN_AF=0.000000;EXAC_FIN_HOM=0;EXAC_FIN_HET=0;EXAC_FIN_HEMI=0
+LIKNS : http://exac.broadinstitute.org/ 
+http://exac.broadinstitute.org/about 
+Hapmap
+这个数据里面记录的数据比较简单，就AF和AR(AR=AC/AN)，POS，共1462978条记录！
+##fileformat=VCFv4.0
+##INFO=<ID=HAP_AF,Number=1,Type=Float,Description="Hapmap 3.3 allele frequency = allele count / total allele">
+##INFO=<ID=HAP_AR,Number=.,Type=String,Description="Hapmap 3.3 allele ratio defined as allele count : total allele">
+##INFO=<ID=HAP_POS,Number=0,Type=Flag,Description="Hapmap 3.3 flag for matching the position and the reference allele but not the alternative allele">
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO
+chr1    566875  .       C       T       .       .       HAP_AF=0.02369;HAP_AR=66:2786
+chr1    567753  .       A       G       .       .       HAP_AF=0.00404;HAP_AR=11:2724
+1000 genome project 3
+千人基因组计划三期的突变数据要复杂一点，除了AF和AR(AR=AC/AN)，POS，SNPSOURCE还区分了人种
+ 
+共39728373条记录
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO
+chrM    3       .       T       C       .       .       1KG_AF=0.0009;1KG_AR=1:1073
+chrM    10      .       T       C       .       .       1KG_AF=0.0019;1KG_AR=2:1074
+ICGC mutation
+ICGC是一个组织，TCGA是它组织的计划
+The International Cancer Genome Consortium (ICGC) and The Cancer Genome Atlas (TCGA) cancer genomics projects
+下载的vcf突变数据里面记录着两种数据，共12647641条记录。
+CN->  tumor sample count.
+RA->   variant ratio: tumor sample count/ disease study tested sample count.
+但是这两个数据都区分了癌症种类，还有样本收集的国家，癌种非常多
+"ICGC r18, from TCGA, Uterine Corpus Endometrial Carcinoma- TCGA, US, 
+"ICGC r18, Lung Cancer - CN, 
+"ICGC r18, from TCGA, Ovarian Serous Cystadenocarcinoma - TCGA, US, 
+"ICGC r18, from TCGA, Head and Neck Squamous Cell Carcinoma - TCGA, US, 
+"ICGC r18, from TCGA, Cervical Squamous Cell Carcinoma - TCGA, US, 
+"ICGC r18, Pediatric Brain Cancer - DE, 
+"ICGC r18, Bladder Cancer - CN, 
+"ICGC r18, Prostate Cancer - CA, 
+"ICGC r18, from TCGA, Brain Glioblastoma Multiforme - TCGA, US, 
+"ICGC r18, Neuroblastoma - TARGET, US, 
+"ICGC r18, Pancreatic Cancer - CA, 
+"ICGC r18, Liver Cancer - NCC, JP, 
+"ICGC r18, Bladder Urothelial Cancer - TGCA, US, 
+"ICGC r18, from TCGA, Gastric Adenocarcinoma - TCGA, US, 
+"ICGC r18, Soft Tissue Cancer - Ewing sarcoma - FR, 
+"ICGC r18, Acute Lymphoblastic Leukemia - TARGET, US, 
+"ICGC r18, Pancreatic Cancer - IT, 
+"ICGC r18, from TCGA, Brain Lower Grade Glioma - TCGA, US, 
+"ICGC r18, Ovarian Cancer - AU, 
+"ICGC r18, Liver Cancer - RIKEN, JP, 
+"ICGC r18, Prostate Cancer - UK, 
+"ICGC r18, Oral Cancer - IN, 
+"ICGC r18, from TCGA, Kidney Renal Clear Cell Carcinoma - TCGA, US, 
+"ICGC r18, Early Onset Prostate Cancer - DE, 
+"ICGC r18, from TCGA, Rectum Adenocarcinoma - TCGA, US, 
+"ICGC r18, Colorectal Cancer - CN, 
+"ICGC r18, from TCGA, Lung Squamous Cell Carcinoma - TCGA, US, 
+"ICGC r18, from TCGA, Kidney Renal Papillary Cell Carcinoma - TCGA, US, 
+"ICGC r18, Benign Liver Tumour - FR, 
+"ICGC r18, Liver Cancer - Hepatocellular macronodules - FR, 
+"ICGC r18, Pancreatic Cancer - AU, 
+"ICGC r18, Pancreatic Cancer Endocrine neoplasms - AU, 
+"ICGC r18, from TCGA, Acute Myeloid Leukemia - TCGA, US, 
+"ICGC r18, Renal Cell Cancer - EU/FR, 
+"ICGC r18, from TCGA, Pancreatic Cancer - TCGA, US, 
+"ICGC r18, Malignant Lymphoma - DE, 
+"ICGC r18, from TCGA, Liver Hepatocellular carcinoma - TCGA, US, 
+"ICGC r18, Gastric Cancer - CN, 
+"ICGC r18, from TCGA, Breast Cancer - TCGA, US, 
+"ICGC r18, Liver Cancer - FR, 
+"ICGC r18, from TCGA, Lung Adenocarcinoma - TCGA, US, 
+"ICGC r18, from TCGA, Head and Neck Thyroid Carcinoma - TCGA, US, 
+"ICGC r18, from TCGA, Prostate Adenocarcinoma - TCGA, US, 
+"ICGC r18, from TCGA, Colon Adenocarcinoma - TCGA, US, 
+"ICGC r18, Bone Cancer - UK, 
+"ICGC r18, Acute Myeloid Leukemia - SK, 
+"ICGC r18, from TCGA, Skin Cutaneous melanoma - TCGA, US, 
+"ICGC r18, Breast Triple Negative/Lobular Cancer - UK, 
+"ICGC r18, Chronic Lymphocytic Leukemia - ES, 
+"ICGC r18, Renal clear cell carcinoma - CN, 
+"ICGC r18, Chronic Myeloid Disorders - UK, 
+"ICGC r18, Lung Cancer - SK, 
+"ICGC r18, Thyroid Cancer - SA, 
+"ICGC r18, Esophageal Cancer - CN, 
+"ICGC r18, Esophageal Adenocarcinoma - UK,
+突变数据如下：
+chrM    71      MU16879057      G       A       .       .       ICGC_TCGA_CN=1;ICGC_CN=1;ICGC_CN_PACA-AU=1;ICGC_RA_PACA-AU=0.00255
+chrM    72      MU16378494      T       C       .       .       ICGC_TCGA_CN=3;ICGC_CN=3;ICGC_CN_RECA-EU=3;ICGC_RA_RECA-EU=0.03158
+chrM    72      MU8785055       T       G       .       .       ICGC_TCGA_CN=1;ICGC_CN=1;ICGC_CN_PACA-AU=1;ICGC_RA_PACA-AU=0.00255
+chrM    114     MU16755427      C       A       .       .       ICGC_TCGA_CN=1;ICGC_CN=1;ICGC_CN_PACA-AU=1;ICGC_RA_PACA-AU=0.00255
+LINKS: https://icgc.org/
+
+dbSNP144 
+是NCBI发布的最新版的snp记录，共146638225条记录
+里面的字段记录着的信息不多，一个是rs的ID号，出现在这个dbsnp144里面的snp肯定是都编号了的，1.4亿条记录都有ID号。
+还有一个字段是记录是否是somatic突变，但是真正有记录的很少很少，大多数都是UNKN
+UNKN	146576120
+BOTH	39911
+GERM	22185
+##fileformat=VCFv4.0
+##INFO=<ID=DBS_SBD,Number=.,Type=String,Description="dbSNP144, first dbSNP Build for RS to appear, RSid and dbSNP build pair values">
+##INFO=<ID=DBS_STATUS,Number=.,Type=String,Description="dbSNP144, variant status: [SOMA- somatic mutation], [GERM- germline mutation], [BOTH- both somatic and germline], [UNKN- status is unknown]">
+##INFO=<ID=DBS_VLD,Number=0,Type=Flag,Description="dbSNP144, flag as valid if variant has 2+ minor allele count based on frequency or genotype data">
+##INFO=<ID=DBS_PM,Number=0,Type=Flag,Description="dbSNP144, flag if variant is pubmed cited or clinical">
+##INFO=<ID=DBS_G5,Number=0,Type=Flag,Description="dbSNP144, flag if variant has >5% minor allele frequency in 1+ populations">
+##INFO=<ID=DBS_OM,Number=0,Type=Flag,Description="dbSNP144, flag if variant has OMIM/OMIA">
+##INFO=<ID=DBS_POS,Number=0,Type=Flag,Description="dbSNP144, flag for matching the position and the reference allele but not the alternative allele">
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO
+chr1    10019   .       TAA     TA      .       .       DBS_SBD=rs775809821:144;DBS_STATUS=UNKN
+chr1    10055   .       TAA     TAAA    .       .       DBS_SBD=rs768019142:144;DBS_STATUS=UNKN
+
+CMC-cosmic-v74
+最新版本是74，共2153353条记录。
+ 
+里面记录的信息非常多
+##fileformat=VCFv4.0
+##INFO=<ID=CMC_HGNCID,Number=.,Type=String,Description="COSMIC v74, HGNC gene id list.">
+##INFO=<ID=CMC_GENEID,Number=.,Type=String,Description="COSMIC v74, gene symbol list.">
+##INFO=<ID=CMC_SAMPLECNT,Number=1,Type=Integer,Description="COSMIC v74, sample count.">
+##INFO=<ID=CMC_MTYPE,Number=.,Type=String,Description="COSMIC v74, mutation type that has been identified, typically substitution, insertion, deletion, compl
+##INFO=<ID=CMC_AA,Number=.,Type=String,Description="COSMIC v74, list of amino acid change [accession number of contig/transcript]">
+##INFO=<ID=CMC_STATUS,Number=.,Type=String,Description="COSMIC v74, mutation status: [SOMA- confirmed somatic mutation], [MSPL- somatic mutation seen at least
+##INFO=<ID=CMC_SAMPLENAME,Number=.,Type=String,Description="COSMIC v74, sample name list.">
+##INFO=<ID=CMC_SAMPLEID,Number=.,Type=String,Description="COSMIC v74, sample id list.">
+##INFO=<ID=CMC_TUMORID,Number=.,Type=String,Description="COSMIC v74, tumor id list.">
+##INFO=<ID=CMC_SITE,Number=.,Type=String,Description="COSMIC v74, tumor site list (primary:subtype).">
+##INFO=<ID=CMC_HISTOLOGY,Number=.,Type=String,Description="COSMIC v74, tumor histology list (primary:subtype).">
+##INFO=<ID=CMC_MUTID,Number=.,Type=String,Description="COSMIC v74, mutation id.">
+##INFO=<ID=CMC_SAMPLESRC,Number=.,Type=String,Description="COSMIC v74, sample source.">
+##INFO=<ID=CMC_TUMORORIGIN,Number=.,Type=String,Description="COSMIC v74, tumor origin.">
+##INFO=<ID=CMC_POS,Number=0,Type=Flag,Description="COSMIC v74, flag for matching the position and the reference allele but not the alternative allele">
+##INFO=<ID=CMC_PUBMED,Number=.,Type=String,Description="COSMIC v74, list of Pubmed reference">
+其中CMC_STATUS记录着该mutation是否为somatic
+ 
+Links: http://cancer.sanger.ac.uk/cosmic  
+http://cancer.sanger.ac.uk/cosmic/datasheets 
