@@ -351,3 +351,69 @@ wget http://liulab.dfci.harvard.edu/CEAS/src/hg19.refGene.gz ; gunzip hg19.refGe
 ~/.local/bin/ceas --name=H3K36me3_ceas --pf-res=20 --gn-group-names='Top 10%,Bottom 10%'  \
 -g hg19.refGene -b  ../paper_results/GSM1278641_Xu_MUT_rep1_BAF155_MUT.peaks.bed -w ../rawData/SRR1042593.wig 
 
+武汉大学epigenomic： https://www.academia.edu/4128096/%E8%A1%A8%E8%A7%82%E9%81%97%E4%BC%A0%E5%AD%A6_epigenetics_
+
+2016年7月8日09:34:36
+
+TCGA改版啦 : https://gdc-portal.nci.nih.gov/
+
+在这里面可以通过各种选项，组合下载
+
+https://gdc-docs.nci.nih.gov/Data_Transfer_Tool/Users_Guide/Getting_Started/
+
+对RNA来说，level3的数据有
+.junction_quantification.txt
+.rsem.genes.results
+.rsem.isoforms.results
+.rsem.genes.normalized_results
+.rsem.isoforms.normalized_results
+.bt.exon_quantification.txt
+而其中
+The normalized results (normalized_count) is a simple transformation of the "raw_count" that you can do yourself to check. For gene level estimates you divide all "raw_count" values by the 75th percentile of the column (after removing zeros) and multiply that by 1000. The normalized file therefore does not take any external factors into account, but simply transforms each sample so the values are relative the 75th percentile with a x1000 adjustment factor.
+normalized的脚本是https://github.com/mozack/ubu/blob/master/src/perl/quartile_norm.pl
+
+Pasted from <https://www.biostars.org/p/106127/> 
+
+## obtain from the broad website
+
+./firehose_get -t Mutation_Packager_Calls.Level_3 stddata latest acc blca brca cesc chol coad coadread gbm hnsc kich kirc kirp laml lgg lihc luad lusc ov paad pcpg prad read sarc skcm stad tgct thca thym ucec ucs uvm dlbc esca meso
+
+用wget从ftp网站里面下载所有的maf文件：wget  -np --level=7 -nH -r -a gcc.log  --directory-prefix=data  --cut-dirs=5  -A .maf 
+但是TCGA已经取消了这种方法：https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/ucs/gsc/
+
+TCGA大文章合集： http://cancergenome.nih.gov/publications 
+nature有TCGA专题：http://www.nature.com/tcga/ 
+synapse更加方便下载 : https://www.synapse.org/#!Synapse:syn2468297/wiki/64259
+[1]Cancer Genome Atlas, N., Comprehensive molecular characterization of human colon and rectal cancer. Nature, 2012. 487(7407): p. 330-7.
+[2]Cancer Genome Atlas, N., Comprehensive molecular portraits of human breast tumours. Nature, 2012. 490(7418): p. 61-70.
+[3]Cancer Genome Atlas Research, N., et al., Integrated genomic characterization of endometrial carcinoma. Nature, 2013. 497(7447): p. 67-73.
+[4]Cancer Genome Atlas Research, N., Comprehensive genomic characterization of squamous cell lung cancers. Nature, 2012. 489(7417): p. 519-25.
+[5]Cancer Genome Atlas Research, N., Genomic and epigenomic landscapes of adult de novo acute myeloid leukemia. N Engl J Med, 2013. 368(22): p. 2059-74.
+[6]Wang, K., et al., MapSplice: accurate mapping of RNA-seq reads for splice junction discovery. Nucleic Acids Res, 2010. 38(18): p. e178.
+[7]Li, B. and C.N. Dewey, RSEM: accurate transcript quantification from RNA-Seq data with or without a reference genome. BMC Bioinformatics, 2011. 12: p. 323.
+ 
+ 
+ http://www.le.com/ptv/vplay/23176049.html
+ http://www.panduoduo.net/r/18910261
+ 
+ TCGA数据的综合分析网站cBioPortal：
+http://www.cbioportal.org/index.do
+
+PrognoScan使用有生存数据的公共GEO数据：
+http://www.abren.net/PrognoScan/PrognoScan.html
+
+我们组开发的癌症基因组数据分析网站www.canEvolve.org：
+http://www.ncbi.nlm.nih.gov/pubmed/23418540
+
+ProgGene
+http://www.jclinbioinformatics.com/content/3/1/22
+
+基因组生存分析网站的综述：
+http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4246473/
+
+不用编程就可以做生物信息分析的网站： 资料下载：https://yunpan.cn/cS2rcSAcaGDFq
+
+
+
+IGV tutorial ： https://github.com/griffithlab/rnaseq_tutorial/wiki/IGV-Tutorial
+http://evomics.org/wp-content/uploads/2011/09/IGVworkshop_CSH_2013.pdf
