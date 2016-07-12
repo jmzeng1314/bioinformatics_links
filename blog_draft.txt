@@ -121,3 +121,169 @@ paper:2013-Differential DNA methylation patterns obese(illumina 27K) : http://ww
 paper:2010-Time Course Gene Expression-Affymetrix Rat Expression 230A Array  http://tpx.sagepub.com/content/early/2010/06/30/0192623310373774.full.pdf
 gene-fusion-chimeric-transcripts:https://www.bioconductor.org/packages/devel/bioc/vignettes/chimera/inst/doc/chimera.pdf
 
+
+Genomic Range 取交并补集的perl程序：
+use Data::Dumper;
+my $geneFile='hg19.gene.bed'; ## hg19.gene.bed
+open FH,$geneFile;
+while(<FH>){
+	my ($chr,undef,undef,$start,$end,undef,undef,undef,undef)=split;
+	/;gene=(.*?);/;my $gene=$1 if $1;
+	#print "$chr\t$gene\n";
+	${$hash{$chr}}{$start}=$gene;
+	${$hash{$chr}}{$end}=$gene;
+}
+close FH;
+#print Dumper $hash{'chr1'};
+#print join"\t",keys $hash{'chr1'};
+open FH,'tcga_snp6_segments.txt';
+<FH>;
+while(<FH>){
+	undef %genes ;
+	my ($experiment_id,$probes_per_segment,$chromosome,$segment_start_pos,$segment_end_pos,$total_copy_number,undef,undef,undef)=split;
+	$chromosome="chr".$chromosome;
+	foreach my $pos (keys $hash{$chromosome}){
+		if ($pos < $segment_end_pos and $pos > $segment_start_pos ){
+			$genes{ ${$hash{$chromosome}}{$pos} }='';
+			#print "${$hash{$chromosome}}{$pos}  \n";
+		}
+	}
+	$geneList=join",",keys %genes;
+	#print "$chromosome\n";
+	print join"\t",($experiment_id,$probes_per_segment,$chromosome,$segment_start_pos,$segment_end_pos,$total_copy_number,$geneList),"\n";
+}
+
+
+分析一个ＣＨＩＰ－ｓｅｑ数据例子：
+
+paper:2014-BRCA1-PALB2-CHIP-seq:http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4194113/
+GSM997540	BRCA1	SRR553473.sra	Read 18878514 spots
+GSM997541	PALB2	SRR553474.sra	Read 17615498 spots
+GSM997542	P_Ser2	SRR553475.sra	Read 35396009 spots
+nohup wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX182/SRX182682/SRR553473/SRR553473.sra &
+nohup wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX182/SRX182683/SRR553474/SRR553474.sra &
+nohup wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX182/SRX182684/SRR553475/SRR553475.sra &
+
+ls *sra |while read id; do ~/biosoft/sratoolkit/sratoolkit.2.6.3-centos_linux64/bin/fastq-dump $id;done
+rm *sra
+ls *.fastq | while read id ; do ~/biosoft/fastqc/FastQC/fastqc $id;done
+### 36 bp   45 GC%
+## cat >runBowtie2.sh
+ls *.fastq | while read id ; 
+do  
+echo $id
+~/biosoft/bowtie/bowtie2-2.2.9/bowtie2 -p 8 -x ~/biosoft/bowtie/hg19_index/hg19 -U $id   -S ${id%%.*}.sam  2>${id%%.*}.align.log; 
+samtools view -bhS -q 30  ${id%%.*}.sam > ${id%%.*}.bam  
+#  -F 1548 https://broadinstitute.github.io/picard/explain-flags.html
+#  -F 0x4  remove the reads that didn't match 
+samtools sort   ${id%%.*}.bam ${id%%.*}.sorted  ## prefix for the output  
+#samtools view  -bhS	 a.sam | samtools sort -o  -  ./ > a.bam
+samtools index ${id%%.*}.sorted.bam 
+done 
+参考：http://cbsu.tc.cornell.edu/lab/doc/CHIPseq_workshop_20150504_lecture1.pdf
+两个ＩＰ是否可以共用同一个ｉｎｐｕｔ：http://seqanswers.com/forums/showthread.php?t=35377
+BigWiggle files for every ChIP-Seq were generated using Bed Tools and the utility bedGraphToBigWig (http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/); these tracks were then uploaded into the UCSC Genome Browser.
+paper:2012-Peak identification for ChIP-seq data with no controls.: http://www.ncbi.nlm.nih.gov/pubmed/23266983
+
+nohup time ~/.local/bin/macs2 callpeak 　-t SRR553473.sorted.bam -f BAM -g hs -n BRCA1	2>BRCA1.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak 　-t SRR553474.sorted.bam -f BAM -g hs -n PALB2	2>PALB2.masc2.log &
+nohup time ~/.local/bin/macs2 callpeak 　-t SRR553475.sorted.bam -f BAM -g hs -n P_Ser2	2>P_Ser2.masc2.log &
+
+## there's no control , we can't use this tool: ranger /ccat /bcp
+~/biosoft/PeakRanger/bin/peakranger ranger --format bam  SRR553473.sorted.bam \
+ --report --gene_annot_file hg19refGene.txt -q 0.05  -t 4  
+
+Some peak callers work without control data and assume an even background signal, others make use of blacklist tools, that mask regions of the genome e.g. RepeatMasker and the “Duke excluded regions” list that was developed for the ENCODE project.
+
+http://epigenie.com/guide-peak-calling-for-chip-seq/
+## change sort bam files to wig files 
+nohup samtools depth SRR553473.sorted.bam | perl -ne 'BEGIN{ print "track type=print wiggle_0 name=SRR553473 description=SRR553473\n"}; ($c, $start, $depth) = split; if ($c ne $lastC) { print "variableStep chrom=$c span=10\n"; };$lastC=$c; next unless $. % 10 ==0;print "$start\t$depth\n" unless $depth<3' > SRR553473.wig	&
+nohup samtools depth SRR553474.sorted.bam | perl -ne 'BEGIN{ print "track type=print wiggle_0 name=SRR553474 description=SRR553474\n"}; ($c, $start, $depth) = split; if ($c ne $lastC) { print "variableStep chrom=$c span=10\n"; };$lastC=$c; next unless $. % 10 ==0;print "$start\t$depth\n" unless $depth<3' > SRR553474.wig	&
+nohup samtools depth SRR553475.sorted.bam | perl -ne 'BEGIN{ print "track type=print wiggle_0 name=SRR553475 description=SRR553475\n"}; ($c, $start, $depth) = split; if ($c ne $lastC) { print "variableStep chrom=$c span=10\n"; };$lastC=$c; next unless $. % 10 ==0;print "$start\t$depth\n" unless $depth<3' > SRR553475.wig	&
+
+## cat >xls2bed.sh
+ls *.xls | while read id ; 
+do  
+echo $id
+grep '^chr\S' $id |perl -alne '{print "$F[0]\t$F[1]\t$F[2]\t$F[9]\t$F[7]\t+"}' >${id%%.*}.bed
+done 
+
+bash xls2bed.sh
+
+cd ~/CHIPseq_test/annotation
+nohup ~/.local/bin/ceas --name=BRCA1_ceas --pf-res=20 --gn-group-names='Top 10%,Bottom 10%'  -g hg19.refGene \
+-b ~/CHIPseq_test/BRAC1-PALB2/raw/BRCA12_peaks.bed -w  ~/CHIPseq_test/BRAC1-PALB2/raw/SRR553473.wig  2>BRCA1.ceas.log &
+nohup ~/.local/bin/ceas --name=PALB2_ceas --pf-res=20 --gn-group-names='Top 10%,Bottom 10%'  -g hg19.refGene \
+-b ~/CHIPseq_test/BRAC1-PALB2/raw/PALB22_peaks.bed -w  ~/CHIPseq_test/BRAC1-PALB2/raw/SRR553474.wig  2>PALB2.ceas.log &
+nohup ~/.local/bin/ceas --name=P_Ser2_ceas --pf-res=20 --gn-group-names='Top 10%,Bottom 10%'  -g hg19.refGene \
+-b ~/CHIPseq_test/BRAC1-PALB2/raw/P_Ser22_peaks.bed -w  ~/CHIPseq_test/BRAC1-PALB2/raw/SRR553475.wig  2>P_Ser2.ceas.log &
+
+
+http://chipseek.cgu.edu.tw/main_menu.py?job_id=1468305524.156
+Alternatively, You may use the job ID: 1468305524.156 to visit ChIPseek latter.
+
+可视化是一件很复杂的事情：https://www.bioconductor.org/packages/devel/bioc/vignettes/GenomeGraphs/inst/doc/GenomeGraphs.pdf
+每个图片均需要画：https://www.researchgate.net/figure/260486518_fig6_Figure-4-Transcriptional-regulation-by-BRCA1-and-PALB2Depletion-of-BRCA1-and-PALB2-in
+University of Birmingham 的两篇表观遗传学论文：http://etheses.bham.ac.uk/5611/2/Eaton15MRes.pdf
+paper:2015-]BRCA1 Recruitment to Transcriptional Pause Sites Is Required for R ...:http://compbio.mit.edu/publications/128_Hatchi_MolCell_15.pdf
+paper:2015-Identifying differential transcription factor binding in ChIP-seq: http://journal.frontiersin.org/article/10.3389/fgene.2015.00169/full
+paper:2016-A comprehensive comparison of tools for differential ChIP-seq analysis:  http://bib.oxfordjournals.org/content/early/2016/01/12/bib.bbv110.full
+http://bib.oxfordjournals.org/content/suppl/2015/12/11/bbv110.DC1/suppl_data.zip
+
+具体详情如下：
+  26K Jul 12 14:01 BRCA12_model.pdf
+  76K Jul 12 13:56 BRCA12_model.r
+ 756K Jul 12 14:31 BRCA12_peaks.bed
+ 1.1M Jul 12 13:57 BRCA12_peaks.narrowPeak
+ 1.3M Jul 12 13:57 BRCA12_peaks.xls
+ 731K Jul 12 13:57 BRCA12_summits.bed
+ 3.2K Jul 12 13:57 BRCA1.masc2.log
+  16M Jul 12 14:02 hg19refGene.txt
+ 1.5M Jul 12 13:24 nohup.out
+  26K Jul 12 14:01 PALB22_model.pdf
+  77K Jul 12 13:57 PALB22_model.r
+ 128K Jul 12 14:31 PALB22_peaks.bed
+ 187K Jul 12 13:57 PALB22_peaks.narrowPeak
+ 212K Jul 12 13:57 PALB22_peaks.xls
+ 123K Jul 12 13:57 PALB22_summits.bed
+ 3.1K Jul 12 13:57 PALB2.masc2.log
+  77K Jul 12 14:14 P_Ser22_model.r
+ 761K Jul 12 14:31 P_Ser22_peaks.bed
+ 1.1M Jul 12 14:15 P_Ser22_peaks.narrowPeak
+ 1.3M Jul 12 14:15 P_Ser22_peaks.xls
+ 735K Jul 12 14:15 P_Ser22_summits.bed
+ 3.8K Jul 12 14:15 P_Ser2.masc2.log
+  530 Jul 12 13:39 runBowtie2.sh
+  220 Jul 12 13:43 SRR553473.align.log
+ 609M Jul 12 13:44 SRR553473.bam
+ 3.7G Jul 12 13:32 SRR553473.fastq
+ 327K Jul 12 13:37 SRR553473_fastqc.html
+ 412K Jul 12 13:37 SRR553473_fastqc.zip
+ 3.2G Jul 12 13:43 SRR553473.sam
+ 531M Jul 12 13:47 SRR553473.sorted.bam
+ 5.9M Jul 12 13:47 SRR553473.sorted.bam.bai
+  30M Jul 12 14:15 SRR553473.wig
+  222 Jul 12 13:50 SRR553474.align.log
+ 482M Jul 12 13:52 SRR553474.bam
+ 3.4G Jul 12 13:33 SRR553474.fastq
+ 318K Jul 12 13:37 SRR553474_fastqc.html
+ 402K Jul 12 13:37 SRR553474_fastqc.zip
+ 2.9G Jul 12 13:50 SRR553474.sam
+ 313M Jul 12 13:54 SRR553474.sorted.bam
+ 5.6M Jul 12 13:54 SRR553474.sorted.bam.bai
+  76M Jul 12 14:14 SRR553474.wig
+  221 Jul 12 14:00 SRR553475.align.log
+ 1.2G Jul 12 14:04 SRR553475.bam
+ 7.1G Jul 12 13:35 SRR553475.fastq
+ 319K Jul 12 13:39 SRR553475_fastqc.html
+ 408K Jul 12 13:39 SRR553475_fastqc.zip
+ 6.0G Jul 12 14:00 SRR553475.sam
+ 1.1G Jul 12 14:09 SRR553475.sorted.bam
+ 6.2M Jul 12 14:09 SRR553475.sorted.bam.bai
+  47M Jul 12 14:27 SRR553475.wig
+  142 Jul 12 14:31 xls2bed.sh
+
+
+
+
+
