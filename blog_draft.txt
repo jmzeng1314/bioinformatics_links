@@ -283,7 +283,187 @@ http://bib.oxfordjournals.org/content/suppl/2015/12/11/bbv110.DC1/suppl_data.zip
   47M Jul 12 14:27 SRR553475.wig
   142 Jul 12 14:31 xls2bed.sh
 
+# https://www.bioconductor.org/packages/devel/bioc/vignettes/Sushi/inst/doc/Sushi.pdf
+# http://bioconductor.org/packages/release/bioc/vignettes/Sushi/inst/doc/Sushi.R
+# http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4173017/
+# Multi-panel Sushi plot made without modification by external image-editing software. 
+# The Sushi functions used to create the plot include 
+# (A) plotManhattan, 
+# (B) plotHic, 
+# (C) plotBedpe,  
+# (D) plotBedgraph 
+# (E) plotBed 
+# (F) plotGenes 
+# The code and data to make this figure are included as part of the Sushi.R package
+library('Sushi')
+Sushi_data = data(package = 'Sushi')
+data(list = Sushi_data$results[,3])  
+Sushi_data$results[,3]  ## 载入包自带的14个数据，可以被上面6种函数来可视化
+head(Sushi_ChIPSeq_CTCF.bedgraph)
 
+## usage: 
+## Rscript ~/CHIPseq_test/peakView.R  Xu_MUT_rep2_peaks.bed ~/CHIPseq_test/rawData/SRR1042595.sorted.bam 
+## mkdir figures_Xu_MUT_rep2_peaks && mv *png figures_Xu_MUT_rep2_peaks/
+
+#options(echo=TRUE) # if you want see commands in output file
+args <- commandArgs(trailingOnly = TRUE)
+bedFile=ifelse(is.na(args[1]),'BRCA12_peaks.bed',args[1]);
+bamFile=ifelse(is.na(args[2]),'SRR553473.sorted.bam',args[2]);
+peakRegion=read.table(bedFile,sep='\t',comment.char = "#",header = FALSE,stringsAsFactors=F)
+## samtools depth -r chr1:1607777-1608177   SRR1042593.sorted.bam 
+#record = as.character(peakRegion[1,])
+apply(peakRegion,1,function(record){
+	cmd=paste0('samtools depth -r ',trimws(record[1]),":",trimws(record[2]),"-",trimws(record[3]),"  ",bamFile)
+	print(cmd)
+	depthTable=system(cmd,intern=TRUE)
+	if ( length(depthTable) >0 ){
+		depthList= as.numeric(unlist(lapply(strsplit(depthTable,"\t"),function(x)x[3])) )
+		png(paste0(record[4],'.png'))
+		plot(depthList,type='l',main=paste(record,collapse=':'))
+		dev.off()
+	}
+
+})
+
+Why there are TP53 mutation in non-cancer samples? Really feel surprising??
+http://www.ncbi.nlm.nih.gov/pubmed/27377626
+Identification of Circulating Tumor DNA for the Early Detection of Small-cell Lung Cancer.
+
+Import, count, index, filter, sort, and merge ‘BAM’ (binary alignment) files : http://rpackages.ianhowson.com/bioc/Rsamtools/man/scanBam.html
+
+ENCODE计划的转录因子列表： http://v1.factorbook.org/mediawiki/index.php/Welcome_to_factorbook
+
+paper:2014-BAF180 promotes cohesion and prevents genome instability and aneuploidy.: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3988838/
+Genome-wide maps of BAF180 and REV-ERBα binding : http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE67852
+Overview for SWI/SNF chromatin remodeling complex : http://www.jbc.org/content/287/37/30897.full
+IL-10 transcription is negatively regulated by BAF180 : http://bmcimmunol.biomedcentral.com/articles/10.1186/1471-2172-13-9
+
+Average ChIP-Seq Gene Profile 	http://www.zymoresearch.com/media/images/land/services/chip-seq/3-Average%20Gene%20Profile.png
+ChIP-Seq Peaks Over Chromosomes:http://www.zymoresearch.com/media/images/land/services/chip-seq/2-Peaks%20Over%20Chromosomes.png
+Creating Meta-Gene Profiles 	http://homer.salk.edu/homer/ngs/metaGeneHomer1.png
+Histograms of Motif Densities:	http://homer.salk.edu/homer/ngs/motifDistExample.png
+Data Matrix for heatmap 	 :	http://homer.salk.edu/homer/ngs/heatmapExample.png
+the results of average profiling within/near important genomic features : http://liulab.dfci.harvard.edu/CEAS/pic/figure6.jpg
+the nucleosomes near the TSS of expressed genes:  
+http://ccg.vital-it.ch/chipseq/doc/f1_Barski&Schones_vs_CAGE.png
+http://ccg.vital-it.ch/chipseq/doc/f1_Schones_vs_CAGE.png
+http://ccg.vital-it.ch/chipseq/doc/f3_STAT1vsTSS.png
+
+all figures in chip-seq workflow : http://www.nature.com/neuro/journal/v17/n11/fig_tab/nn.3816_F2.html
+CHIP-seq综述：
+http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003326
+http://genome.cshlp.org/content/22/9/1813.full.pdf+html
+http://genomebiology.biomedcentral.com/articles/10.1186/gb-2008-9-9-r137
+http://www.nature.com/nrg/journal/v10/n10/pdf/nrg2641.pdf
+http://www.nature.com/nrg/journal/v13/n12/abs/nrg3306.html
+http://nar.oxfordjournals.org/content/early/2012/05/18/nar.gks433.short
+ identification of Protein–DNA binding sites with SISSRs peak-finder http://rd.springer.com/protocol/10.1007/978-1-61779-400-1_20#page-1 
+Normalization, bias correction, and peak calling for ChIP-seq ： http://www.degruyter.com/dg/viewarticle.fullcontentlink:pdfeventlink/$002fj$002fsagmb.2012.11.issue-3$002f1544-6115.1750$002f1544-6115.1750.pdf/1544-6115.1750.pdf?t:ac=j$002fsagmb.2012.11.issue-3$002f1544-6115.1750$002f1544-6115.1750.xml
+
+
+average ChIP signal profiles on top 10 % , middle 10 %, and bottom 10 % of expressed genes	http://liulab.dfci.harvard.edu/CEAS/pic/figure13.jpg
+Illustration of how variability in an INPUT-seq profile can affect reconstruction of average signal https://openi.nlm.nih.gov/imgs/512/49/3053263/PMC3053263_1471-2164-12-134-4.png
+Average profiles of modified histones around the summit of ChIP-seq peaks.	 https://www.researchgate.net/figure/233829852_fig2_Average-profiles-of-modified-histones-around-the-summit-of-ChIP-seq-peaks-Profiles-are
+tissue-specific enhancers and promoters : http://www.nature.com/nsmb/journal/v18/n8/full/nsmb.2085.html?annotation=1 
+ Heatmap with all genes scaled to one size and user-specified groups of genes:  https://github.com/fidelram/deepTools/wiki/Visualizations
+Binding of Other Transcription Factors or Histone Marks at the GABP Peaks :http://v1.factorbook.org/mediawiki/index.php/GABP
+An overview of ChIP–seq, DNase-seq, ATAC-seq, MNase-seq and FAIRE–seq experiments.	：http://www.nature.com/nrg/journal/v15/n11/fig_tab/nrg3788_F1.html
+
+通过CHIP-seq数据来准确定义 enhancers 不是一件简单事情 (Question: Tools to identify enhancers from chromatin marks:https://www.biostars.org/p/200697/#200801)
+The problem is that there is not a good definition of "enhancer". Do you use "overlap of H3K4me1 and H3K4me3"? Or maybe "high ratio of H3K4me1 to H3K4me3". Maybe require DNase hypersensitivity. And maybe require some threshold of acetylation. Ideally you would also require evidence of long-range interaction with at least one promoter. There are many differing definitions in the literature along these lines. Another option is to use chromatin segmentation tools which find patterns in your data that you can then interpret as "enhancer-like". An advantage to this is that you can find some interesting results, like different classes of enhancers that you otherwise might not have found. And you can always use the ad hoc enhancer definitions to look for enrichment in chromatin segmentations.
+
+ 
+BLIMP1 binding to gene promoters encoding transcription factors, and cell-cycle and developmental regulators http://www.nature.com/ncb/journal/v15/n8/fig_tab/ncb2798_F2.html
+本文数据都在EBI上面，对老鼠测序： http://www.ebi.ac.uk/arrayexpress/search.html?query=BLIMP1+ChIP-seq
+ GSE25409 for the PRDM14 ChIP-seq  
+ GSE24841 for the SIN3a ChIP-seq  
+ GSE20530 for the NELFA ChIP-seq  
+ GSE26680 for the RING1B ChIP-seq 
+ GSE13084 for EZH2 ChIP-seq
+以上5个数据是它引用的GEO的公共数据
+ 
+nodes and cores and threads and CPUs and processors ! 
+A thread is a single line of commands that are getting processed, each application has at least one thread, most have multiples. A core is the physical hardware that works on the thread. In general a processor can only work on one thread per core, CPUs with hyper threading can work on up to two threads per core.
+For processors with hyper threading, there are extra registers and execution units in the core so it can store the state of two threads and work on them both, normally to change threads you have to empty the registers into the cache, write that back to the main memory, then load up the cache with the new values and load up the registers, context switches hurt performance significantly.
+
+
+文献数据解读：Genome-wide maps of H3K4me2/3 in prostate cancer cell line LNCaP http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE20042
+想看看用dihydrotestosterone处理了 cancer cell line LNCaP 这个细胞系之后，看看组蛋白甲基化修饰变化
+主要是为了分析差异 核小体定位点 区别：Model for identifying differential transcription factor binding locations
+这个软件很旧了，也是哈佛刘小乐实验室出品的：NPS was used to identify nucleosome positions based on treatment condition data.
+同时也测了芯片数据：Affymetrix U133 Plus 2.0 microarray data，但是似乎并没有给地址
+
+首先下载数据
+cd ~/CHIPseq_test/
+mkdir GSE20042_H3K4me2_3 && cd GSE20042_H3K4me2_3 
+mkdir rawData && cd rawData
+for ((i=146;i<153;i++)) ;do wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP002/SRP002077/SRR037$i/SRR037$i.sra;done
+GSM503903	H3K4me2_Vehicle_ChIPSeq	SRR037146(Read 7,530,267 spots )/SRR037147(Read 6,215,981 spots )
+GSM503904	H3K4me2_DHT_4h_ChIPSeq	SRR037148(Read 6,510,159 spots )/SRR037149(Read 6,246,716 spots )
+GSM503905	H3K4me2_DHT_16h_ChIPSeq	SRR037150	Read 9,685,845 spots  
+GSM503906	H3K4me3_Vehicle_ChIPSeq	SRR037151	Read 6,755,854 spots 
+GSM503907	H3K4me3_DHT_4h_ChIPSeq	SRR037152	Read 4,761,769 spots 
+ls *sra |while read id; do ~/biosoft/sratoolkit/sratoolkit.2.6.3-centos_linux64/bin/fastq-dump $id;done
+rm *sra
+ls *.fastq | while read id ; do ~/biosoft/fastqc/FastQC/fastqc $id;done
+mkdir QC_results
+mv *zip *html QC_results/
+接下来做比对
+## cat >run_bowtie2.sh
+ls *.fastq | while read id ; 
+do  
+echo $id
+~/biosoft/bowtie/bowtie2-2.2.9/bowtie2 -3 5 -p 8 -x ~/biosoft/bowtie/hg19_index/hg19 -U $id   -S ${id%%.*}.sam  2>${id%%.*}.align.log; 
+samtools view -bhS -q 30  ${id%%.*}.sam > ${id%%.*}.bam  ## -F 1548 https://broadinstitute.github.io/picard/explain-flags.html
+samtools sort   ${id%%.*}.bam ${id%%.*}.sorted  ## prefix for the output  
+samtools index ${id%%.*}.sorted.bam 
+done 
+然后下载GEO的核小体定位点(peaks)结果：
+tar xvf GSE20042_RAW.tar
+ls *gz |xargs gunzip
+wc -l *txt 
+  235639 GSM503903_LNCaP_H3K4me2_Vehicle_2Lanes_normalized_peak.txt
+  248570 GSM503904_LNCaP_H3K4me2_DHT_4h_2Lanes_normalized_peak.txt
+  185892 GSM503905_LNCaP_H3K4me2_DHT_16h_peak.txt
+   74491 GSM503906_LNCaP_H3K4me3_Vehicle_normalized_peak.txt
+  104022 GSM503907_LNCaP_H3K4me3_DHT_4h_normalized_peak.txt
+然后根据比对的bam文件来可视化这些核小体peaks,很诡异，不知道他是如何找到的这些peaks
+Rscript ~/CHIPseq_test/peakView.R GSM503907_LNCaP_H3K4me3_DHT_4h_normalized_peak.bed  ../rawData/SRR037152.sorted.bam
+
+我用MACS2软件来call peaks 看看： 
+# http://www2.uef.fi/documents/1698400/2466431/Macs2/f4d12870-34f9-43ef-bf0d-f5d087267602
+ls *sorted.bam |while read id;do ( nohup time ~/.local/bin/macs2 callpeak -t $id -f BAM -g hs -n ${id%%.*} 2>${id%%.*}.masc2.log &) ;done 
+mkdir ../MACS2results
+mv *bed *xls *Peak *r  ../MACS2results
+cd ../MACS2results
+ls *.xls | while read id ; 
+do  
+echo $id
+grep '^chr\S' $id |perl -alne '{print "$F[0]\t$F[1]\t$F[2]\t$F[9]\t$F[7]\t+"}' >${id%%.*}.bed
+done 
+然后重新浏览peaks
+Rscript ~/CHIPseq_test/peakView.R SRR037152_peaks.bed  ../rawData/SRR037152.sorted.bam
+看起来我call的peaks更靠谱一点，不知道那边在搞些什么
+三种peaks的区别：  https://www.biostars.org/p/159925/ 
+UCSC定义三种peaks的columns ： https://genome.ucsc.edu/FAQ/FAQformat.html#format12
+
+http://www.strand-ngs.com/files/promotions/StrandNGS-ChIPseq-broadPeaks.pdf
+mkdir ~/tmp/roadmap/H3K4me1 
+wget http://www.broadinstitute.org/~anshul/projects/roadmap/peaks/consolidated/broadPeak/E001-H3K4me1.broadPeak.gz 
+wget http://www.broadinstitute.org/~anshul/projects/roadmap/peaks/consolidated/gappedPeak/E001-H3K4me1.gappedPeak.gz 
+wget http://www.broadinstitute.org/~anshul/projects/roadmap/peaks/consolidated/narrowPeak/E001-H3K4me1.narrowPeak.gz 
+wget http://www.broadinstitute.org/~anshul/projects/roadmap/alignments/consolidated/E001-H3K4me1.tagAlign.gz 
+wget http://www.broadinstitute.org/~anshul/projects/roadmap/alignments/consolidated/E001-Input.tagAlign.gz
+wget http://www.broadinstitute.org/~anshul/projects/roadmap/rawdata/Release9/experiment-sample/Histone_H3K4me1/ES-I3_Cell_Line/BI.ES-I3.H3K4me1.Lib_MC_20100211_02--ChIP_MC_20100208_02_hES_I3_TESR_H3K4Me1.bed.gz
+wget http://www.broadinstitute.org/~anshul/projects/roadmap/rawdata/Release9/experiment-sample/Histone_H3K4me1/ES-I3_Cell_Line/BI.ES-I3.H3K4me1.Solexa-15382.bed.gz
+
+ 
+然后同样的用CEAS来画一些图 
+cd ~/CHIPseq_test/annotation/
+ 
+
+ 
+ 
 
 
 
