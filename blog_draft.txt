@@ -1,469 +1,62 @@
-https://channel9.msdn.com/Events/useR-international-R-User-conference/useR2016/Towards-a-grammar-of-interactive-graphics
-useR! 2016 international R User conference 会议视频全部下载
+http://www.compgenome.org/TCGA-Assembler/documents/TCGA-Assembler%20User%20Manual.pdf
 
-如何一步步发现miR-31和lung cancer的关系
-http://www.ncbi.nlm.nih.gov/pubmed/20237410
-http://www.ncbi.nlm.nih.gov/pubmed/24099915
-http://www.ncbi.nlm.nih.gov/pubmed/26657862
-http://www.sciencedirect.com/science/article/pii/S075333221400033X
-http://www.genecards.org/cgi-bin/carddisp.pl?gene=MIR31
-http://www.mirbase.org/cgi-bin/mirna_summary.pl?fam=MIPF0000064
-然后用R语言来分析TCGA的数据
-library(cgdsr)
-mycgds <- CGDS('http://www.cbioportal.org/public-portal/')
-test(mycgds)
-all_TCGA_studies <- getCancerStudies(mycgds)
-## http://cancergenome.nih.gov/publications/publicationguidelines
-lungPaper=all_TCGA_studies[grepl('Lung',all_TCGA_studies$name),]
-myPaper=lungPaper[6,1]  ## cancer_study_id
+比对的bam文件被转为bed格式的文件，这样就只需要测序深度信息，不需要care序列具体是什么
+http://bedtools.readthedocs.io/en/latest/content/tools/bamtobed.html
+sam/bam/bed格式的比对文件转为bedGraph格式文件：
+http://bedtools.readthedocs.io/en/latest/content/tools/genomecov.html 
+bedtools genomecov  -bg -i E001-H3K4me1.tagAlign -g mygenome.txt >E001-H3K4me1.bedGraph
+bedtools genomecov  -bg -i E001-Input.tagAlign -g mygenome.txt >E001-Input.bedGraph
 
-allTables <- getCaseLists(mycgds, myPaper)
-allDatasets<- getGeneticProfiles(mycgds, myPaper)  
-( myTable <- allTables[14,1] )     ## case_set_id  # how many samples 
-( myDataset <- allDatasets[8,1] )  ## genetic_profile_id  ## what kind of data (miRNA/mRNA/somatic/CNV/methy/protein)
-myGene='MIR-31/31'
-miR31 <- getProfileData(mycgds,myGene, myDataset, myTable)
-## ~~~~~~~~~~~~~~~~web-API ~~~~~~~~~~~~~~~~ 
-# ## http://www.cbioportal.org/webservice.do?cmd=getProfileData
-# &cancer_study_id=lusc_tcga_pub
-# &genetic_profile_id=lusc_tcga_pub_mirna
-# &case_set_id=lusc_tcga_pub_microrna
-# &gene_list=MIR-31/31
-## ~~~~~~~~~~~~~~~~web-API ~~~~~~~~~~~~~~~~ 
-getClinicalData(mycgds, allTables[14,'case_ids'])
+ls *gz |xargs gunzip 
 
-library(survival)
-attach(ov_tcga_pub_meth1)
-## 估计KM生存曲线
-my.surv <- Surv(OS_MONTHS,OS_STATUS=='LIVING')
-kmfit1 <- survfit(my.surv~1)
-summary(kmfit1)
-plot(kmfit1)
-
-miRNA芯片(nCounter NanoString assays)分析 Differentially expressed miRNAs in MCF7:2A versus MCF7 cells ：http://cancerres.aacrjournals.org/content/75/2/436.figures-only
+ 1.5G Dec 29  2011 BI.ES-I3.H3K4me1.Lib_MC_20100211_02--ChIP_MC_20100208_02_hES_I3_TESR_H3K4Me1.bed
+ 762M Nov 17  2010 BI.ES-I3.H3K4me1.Solexa-15382.bed
+  22M Oct 31  2013 E001-H3K4me1.broadPeak
+  15M Oct 31  2013 E001-H3K4me1.gappedPeak
+  21M Oct  9  2013 E001-H3K4me1.narrowPeak
+ 942M Oct  7  2013 E001-H3K4me1.tagAlign
+ 942M Oct  7  2013 E001-Input.tagAlign
 
 
-http://clincancerres.aacrjournals.org/content/21/2/373
-Gene and/or miRNA expression data for Buffa, Enerly, and Lyng datasets were retrieved from NCBI GEO. Gene expression, DNA copy number, reverse phase protein array (RPPA) protein expression, miRNA expression, and mutation status for breast cancers from the TCGA dataset were obtained using the CGDS-R package v 1.1.30. 
-
-
-GeneVestigator
-http://www.hindawi.com/journals/abi/2008/420747/
-https://www.youtube.com/watch?v=9-G-5ru0bNs
-https://genevestigator.com/gv/file/GENEVESTIGATOR_UserManual.pdf
-https://genevestigator.com/gv/doc/video_tutorials.jsp
-http://www.bio-m.org/fileadmin/user_upload/1-3-Staubli_ok.pdf
-https://github.com/jmzeng1314/my-R/tree/master/9-microarray-examples
-
-http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE41571	很简单的平台 Affymetrix Human Genome U133 Plus 2.0 Array，但是它把表达量给归一化了~
-
-IPA:
-https://www.youtube.com/watch?v=DtxqK_nL4lw
-https://www.youtube.com/watch?v=PfF_Ru73-1o 
-一个整合工具，包括：
-~85,000 new findings (bringing total to over 5.5 million findings), including:
-~39,000 new Expert findings
-~600 new ExpertAssist findings
-~46,000 new protein-protein interactions from the BioGRID database
-~12,000 new cancer mutation disease association findings from COSMIC
-~3,700 new mutation-to-disease findings from ClinVar
-~1,200 new disease-to-drug findings from ClinicalTrials.gov
-~900 new disease target findings from ClinicalTrials.gov
-~800 new gene-to-biological process assertions from Gene Ontology (GO)
-~1,100 new mouse knockout-to-phenotype findings in Mouse Genome Database (JAX Labs)
-~900 new protein-protein interactions from the IntAct database
-~300 new biomarker findings from GVK Biosciences
-~100 gene-to-disease findings from OMIM
-
-ftp://ftp.uniprot.org/pub/databases/uniprot/previous_releases/
-ftp://ftp.ncbi.nih.gov/repository/UniGene/
-ftp://ftp.ncbi.nlm.nih.gov/refseq/release/release-notes/archive/
-
-omicsoft 
-
-[00:00:00] Connecting to server...
-[00:00:00] Uploading input data...
-[00:00:00] Executing command on the server...
-[00:00:00] Downloading output data...
-[00:00:01] Initializing genome...
-[00:00:01] Connecting to server...
-[00:00:01] Uploading input data...
-[00:00:01] Executing command on the server...
-[00:00:01] Downloading output data...
-[00:00:02] Building gene model profile from gene model...
-[00:00:02] Saving gene model database file...
-[00:00:02] Adding genes to gene model profile database...
-[00:00:22] Committing transaction...
-[00:00:22] Transaction committed...
-[00:00:22] Adding transcripts to gene model profile database...
-[00:00:47] Committing transaction...
-[00:00:47] Transaction committed...
-[00:00:47] Building gene model profile from gene model...
-[00:00:47] Downloading from http://omicsoft.com/downloads/dreflib/Human.B37.3_GenCode.V19.gmodel2.gzip...
-[00:00:58] Unzipping file...
-[00:01:02] Saving gene model database file...
-[00:01:02] Adding genes to gene model profile database...
-[00:01:24] Committing transaction...
-[00:01:24] Transaction committed...
-[00:01:24] Adding transcripts to gene model profile database...
-
-https://wiki.transmartfoundation.org/download/attachments/8782176/F%20Use_case_for_BioIT_world_2015.pdf?version=1&modificationDate=1440501738471&api=v2
-
-始终觉得firbrower是最方便的下载TCGA数据：
-https://gdac.broadinstitute.org/
-http://firebrowse.org/
-http://firebrowse.org/tutorial/FireBrowse-Tutorial.pdf
-最后也是进入FTP：http://gdac.broadinstitute.org/runs/stddata__2016_01_28/data/
-http://gdac.broadinstitute.org/runs/stddata__2016_01_28/data/COADREAD/20160128/
-
-
-paper:2013-Differential DNA methylation patterns obese(illumina 27K) : http://www.fasebj.org/content/early/2013/03/08/fj.12-215566.full.pdf
-paper:2010-Time Course Gene Expression-Affymetrix Rat Expression 230A Array  http://tpx.sagepub.com/content/early/2010/06/30/0192623310373774.full.pdf
-gene-fusion-chimeric-transcripts:https://www.bioconductor.org/packages/devel/bioc/vignettes/chimera/inst/doc/chimera.pdf
-
-
-Genomic Range 取交并补集的perl程序：
-use Data::Dumper;
-my $geneFile='hg19.gene.bed'; ## hg19.gene.bed
-open FH,$geneFile;
-while(<FH>){
-	my ($chr,undef,undef,$start,$end,undef,undef,undef,undef)=split;
-	/;gene=(.*?);/;my $gene=$1 if $1;
-	#print "$chr\t$gene\n";
-	${$hash{$chr}}{$start}=$gene;
-	${$hash{$chr}}{$end}=$gene;
-}
-close FH;
-#print Dumper $hash{'chr1'};
-#print join"\t",keys $hash{'chr1'};
-open FH,'tcga_snp6_segments.txt';
-<FH>;
-while(<FH>){
-	undef %genes ;
-	my ($experiment_id,$probes_per_segment,$chromosome,$segment_start_pos,$segment_end_pos,$total_copy_number,undef,undef,undef)=split;
-	$chromosome="chr".$chromosome;
-	foreach my $pos (keys $hash{$chromosome}){
-		if ($pos < $segment_end_pos and $pos > $segment_start_pos ){
-			$genes{ ${$hash{$chromosome}}{$pos} }='';
-			#print "${$hash{$chromosome}}{$pos}  \n";
-		}
-	}
-	$geneList=join",",keys %genes;
-	#print "$chromosome\n";
-	print join"\t",($experiment_id,$probes_per_segment,$chromosome,$segment_start_pos,$segment_end_pos,$total_copy_number,$geneList),"\n";
-}
-
-
-分析一个ＣＨＩＰ－ｓｅｑ数据例子：
-
-paper:2014-BRCA1-PALB2-CHIP-seq:http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4194113/
-GSM997540	BRCA1	SRR553473.sra	Read 18878514 spots
-GSM997541	PALB2	SRR553474.sra	Read 17615498 spots
-GSM997542	P_Ser2	SRR553475.sra	Read 35396009 spots
-nohup wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX182/SRX182682/SRR553473/SRR553473.sra &
-nohup wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX182/SRX182683/SRR553474/SRR553474.sra &
-nohup wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByExp/sra/SRX/SRX182/SRX182684/SRR553475/SRR553475.sra &
-
-ls *sra |while read id; do ~/biosoft/sratoolkit/sratoolkit.2.6.3-centos_linux64/bin/fastq-dump $id;done
-rm *sra
-ls *.fastq | while read id ; do ~/biosoft/fastqc/FastQC/fastqc $id;done
-### 36 bp   45 GC%
-## cat >runBowtie2.sh
-ls *.fastq | while read id ; 
-do  
-echo $id
-~/biosoft/bowtie/bowtie2-2.2.9/bowtie2 -p 8 -x ~/biosoft/bowtie/hg19_index/hg19 -U $id   -S ${id%%.*}.sam  2>${id%%.*}.align.log; 
-samtools view -bhS -q 30  ${id%%.*}.sam > ${id%%.*}.bam  
-#  -F 1548 https://broadinstitute.github.io/picard/explain-flags.html
-#  -F 0x4  remove the reads that didn't match 
-samtools sort   ${id%%.*}.bam ${id%%.*}.sorted  ## prefix for the output  
-#samtools view  -bhS	 a.sam | samtools sort -o  -  ./ > a.bam
-samtools index ${id%%.*}.sorted.bam 
-done 
-参考：http://cbsu.tc.cornell.edu/lab/doc/CHIPseq_workshop_20150504_lecture1.pdf
-两个ＩＰ是否可以共用同一个ｉｎｐｕｔ：http://seqanswers.com/forums/showthread.php?t=35377
-BigWiggle files for every ChIP-Seq were generated using Bed Tools and the utility bedGraphToBigWig (http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/); these tracks were then uploaded into the UCSC Genome Browser.
-paper:2012-Peak identification for ChIP-seq data with no controls.: http://www.ncbi.nlm.nih.gov/pubmed/23266983
-
-nohup time ~/.local/bin/macs2 callpeak 　-t SRR553473.sorted.bam -f BAM -g hs -n BRCA1	2>BRCA1.masc2.log &
-nohup time ~/.local/bin/macs2 callpeak 　-t SRR553474.sorted.bam -f BAM -g hs -n PALB2	2>PALB2.masc2.log &
-nohup time ~/.local/bin/macs2 callpeak 　-t SRR553475.sorted.bam -f BAM -g hs -n P_Ser2	2>P_Ser2.masc2.log &
-
-## there's no control , we can't use this tool: ranger /ccat /bcp
-~/biosoft/PeakRanger/bin/peakranger ranger --format bam  SRR553473.sorted.bam \
- --report --gene_annot_file hg19refGene.txt -q 0.05  -t 4  
-
-Some peak callers work without control data and assume an even background signal, others make use of blacklist tools, that mask regions of the genome e.g. RepeatMasker and the “Duke excluded regions” list that was developed for the ENCODE project.
-
-http://epigenie.com/guide-peak-calling-for-chip-seq/
-## change sort bam files to wig files 
-nohup samtools depth SRR553473.sorted.bam | perl -ne 'BEGIN{ print "track type=print wiggle_0 name=SRR553473 description=SRR553473\n"}; ($c, $start, $depth) = split; if ($c ne $lastC) { print "variableStep chrom=$c span=10\n"; };$lastC=$c; next unless $. % 10 ==0;print "$start\t$depth\n" unless $depth<3' > SRR553473.wig	&
-nohup samtools depth SRR553474.sorted.bam | perl -ne 'BEGIN{ print "track type=print wiggle_0 name=SRR553474 description=SRR553474\n"}; ($c, $start, $depth) = split; if ($c ne $lastC) { print "variableStep chrom=$c span=10\n"; };$lastC=$c; next unless $. % 10 ==0;print "$start\t$depth\n" unless $depth<3' > SRR553474.wig	&
-nohup samtools depth SRR553475.sorted.bam | perl -ne 'BEGIN{ print "track type=print wiggle_0 name=SRR553475 description=SRR553475\n"}; ($c, $start, $depth) = split; if ($c ne $lastC) { print "variableStep chrom=$c span=10\n"; };$lastC=$c; next unless $. % 10 ==0;print "$start\t$depth\n" unless $depth<3' > SRR553475.wig	&
-
-## cat >xls2bed.sh
-ls *.xls | while read id ; 
-do  
-echo $id
-grep '^chr\S' $id |perl -alne '{print "$F[0]\t$F[1]\t$F[2]\t$F[9]\t$F[7]\t+"}' >${id%%.*}.bed
-done 
-
-bash xls2bed.sh
-
-cd ~/CHIPseq_test/annotation
-nohup ~/.local/bin/ceas --name=BRCA1_ceas --pf-res=20 --gn-group-names='Top 10%,Bottom 10%'  -g hg19.refGene \
--b ~/CHIPseq_test/BRAC1-PALB2/raw/BRCA12_peaks.bed -w  ~/CHIPseq_test/BRAC1-PALB2/raw/SRR553473.wig  2>BRCA1.ceas.log &
-nohup ~/.local/bin/ceas --name=PALB2_ceas --pf-res=20 --gn-group-names='Top 10%,Bottom 10%'  -g hg19.refGene \
--b ~/CHIPseq_test/BRAC1-PALB2/raw/PALB22_peaks.bed -w  ~/CHIPseq_test/BRAC1-PALB2/raw/SRR553474.wig  2>PALB2.ceas.log &
-nohup ~/.local/bin/ceas --name=P_Ser2_ceas --pf-res=20 --gn-group-names='Top 10%,Bottom 10%'  -g hg19.refGene \
--b ~/CHIPseq_test/BRAC1-PALB2/raw/P_Ser22_peaks.bed -w  ~/CHIPseq_test/BRAC1-PALB2/raw/SRR553475.wig  2>P_Ser2.ceas.log &
-
-
-http://chipseek.cgu.edu.tw/main_menu.py?job_id=1468305524.156
-Alternatively, You may use the job ID: 1468305524.156 to visit ChIPseek latter.
-
-可视化是一件很复杂的事情：https://www.bioconductor.org/packages/devel/bioc/vignettes/GenomeGraphs/inst/doc/GenomeGraphs.pdf
-每个图片均需要画：https://www.researchgate.net/figure/260486518_fig6_Figure-4-Transcriptional-regulation-by-BRCA1-and-PALB2Depletion-of-BRCA1-and-PALB2-in
-University of Birmingham 的两篇表观遗传学论文：http://etheses.bham.ac.uk/5611/2/Eaton15MRes.pdf
-paper:2015-]BRCA1 Recruitment to Transcriptional Pause Sites Is Required for R ...:http://compbio.mit.edu/publications/128_Hatchi_MolCell_15.pdf
-paper:2015-Identifying differential transcription factor binding in ChIP-seq: http://journal.frontiersin.org/article/10.3389/fgene.2015.00169/full
-paper:2016-A comprehensive comparison of tools for differential ChIP-seq analysis:  http://bib.oxfordjournals.org/content/early/2016/01/12/bib.bbv110.full
-http://bib.oxfordjournals.org/content/suppl/2015/12/11/bbv110.DC1/suppl_data.zip
-
-具体详情如下：
-  26K Jul 12 14:01 BRCA12_model.pdf
-  76K Jul 12 13:56 BRCA12_model.r
- 756K Jul 12 14:31 BRCA12_peaks.bed
- 1.1M Jul 12 13:57 BRCA12_peaks.narrowPeak
- 1.3M Jul 12 13:57 BRCA12_peaks.xls
- 731K Jul 12 13:57 BRCA12_summits.bed
- 3.2K Jul 12 13:57 BRCA1.masc2.log
-  16M Jul 12 14:02 hg19refGene.txt
- 1.5M Jul 12 13:24 nohup.out
-  26K Jul 12 14:01 PALB22_model.pdf
-  77K Jul 12 13:57 PALB22_model.r
- 128K Jul 12 14:31 PALB22_peaks.bed
- 187K Jul 12 13:57 PALB22_peaks.narrowPeak
- 212K Jul 12 13:57 PALB22_peaks.xls
- 123K Jul 12 13:57 PALB22_summits.bed
- 3.1K Jul 12 13:57 PALB2.masc2.log
-  77K Jul 12 14:14 P_Ser22_model.r
- 761K Jul 12 14:31 P_Ser22_peaks.bed
- 1.1M Jul 12 14:15 P_Ser22_peaks.narrowPeak
- 1.3M Jul 12 14:15 P_Ser22_peaks.xls
- 735K Jul 12 14:15 P_Ser22_summits.bed
- 3.8K Jul 12 14:15 P_Ser2.masc2.log
-  530 Jul 12 13:39 runBowtie2.sh
-  220 Jul 12 13:43 SRR553473.align.log
- 609M Jul 12 13:44 SRR553473.bam
- 3.7G Jul 12 13:32 SRR553473.fastq
- 327K Jul 12 13:37 SRR553473_fastqc.html
- 412K Jul 12 13:37 SRR553473_fastqc.zip
- 3.2G Jul 12 13:43 SRR553473.sam
- 531M Jul 12 13:47 SRR553473.sorted.bam
- 5.9M Jul 12 13:47 SRR553473.sorted.bam.bai
-  30M Jul 12 14:15 SRR553473.wig
-  222 Jul 12 13:50 SRR553474.align.log
- 482M Jul 12 13:52 SRR553474.bam
- 3.4G Jul 12 13:33 SRR553474.fastq
- 318K Jul 12 13:37 SRR553474_fastqc.html
- 402K Jul 12 13:37 SRR553474_fastqc.zip
- 2.9G Jul 12 13:50 SRR553474.sam
- 313M Jul 12 13:54 SRR553474.sorted.bam
- 5.6M Jul 12 13:54 SRR553474.sorted.bam.bai
-  76M Jul 12 14:14 SRR553474.wig
-  221 Jul 12 14:00 SRR553475.align.log
- 1.2G Jul 12 14:04 SRR553475.bam
- 7.1G Jul 12 13:35 SRR553475.fastq
- 319K Jul 12 13:39 SRR553475_fastqc.html
- 408K Jul 12 13:39 SRR553475_fastqc.zip
- 6.0G Jul 12 14:00 SRR553475.sam
- 1.1G Jul 12 14:09 SRR553475.sorted.bam
- 6.2M Jul 12 14:09 SRR553475.sorted.bam.bai
-  47M Jul 12 14:27 SRR553475.wig
-  142 Jul 12 14:31 xls2bed.sh
-
-# https://www.bioconductor.org/packages/devel/bioc/vignettes/Sushi/inst/doc/Sushi.pdf
-# http://bioconductor.org/packages/release/bioc/vignettes/Sushi/inst/doc/Sushi.R
-# http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4173017/
-# Multi-panel Sushi plot made without modification by external image-editing software. 
-# The Sushi functions used to create the plot include 
-# (A) plotManhattan, 
-# (B) plotHic, 
-# (C) plotBedpe,  
-# (D) plotBedgraph 
-# (E) plotBed 
-# (F) plotGenes 
-# The code and data to make this figure are included as part of the Sushi.R package
+然后就可以读取peaks来看看测序覆盖度的区别啦
+broadPeak=read.table("E001-H3K4me1.broadPeak",stringsAsFactors=F)
+gappedPeak=read.table("E001-H3K4me1.gappedPeak",stringsAsFactors=F)
+narrowPeak=read.table("E001-H3K4me1.narrowPeak",stringsAsFactors=F)
+inputBed=read.table("E001-Input.bedGraph",stringsAsFactors=F)
+chipBed=read.table("E001-H3K4me1.bedGraph",stringsAsFactors=F)
 library('Sushi')
-Sushi_data = data(package = 'Sushi')
-data(list = Sushi_data$results[,3])  
-Sushi_data$results[,3]  ## 载入包自带的14个数据，可以被上面6种函数来可视化
-head(Sushi_ChIPSeq_CTCF.bedgraph)
 
-## usage: 
-## Rscript ~/CHIPseq_test/peakView.R  Xu_MUT_rep2_peaks.bed ~/CHIPseq_test/rawData/SRR1042595.sorted.bam 
-## mkdir figures_Xu_MUT_rep2_peaks && mv *png figures_Xu_MUT_rep2_peaks/
-
-#options(echo=TRUE) # if you want see commands in output file
-args <- commandArgs(trailingOnly = TRUE)
-bedFile=ifelse(is.na(args[1]),'BRCA12_peaks.bed',args[1]);
-bamFile=ifelse(is.na(args[2]),'SRR553473.sorted.bam',args[2]);
-peakRegion=read.table(bedFile,sep='\t',comment.char = "#",header = FALSE,stringsAsFactors=F)
-## samtools depth -r chr1:1607777-1608177   SRR1042593.sorted.bam 
-#record = as.character(peakRegion[1,])
-apply(peakRegion,1,function(record){
-	cmd=paste0('samtools depth -r ',trimws(record[1]),":",trimws(record[2]),"-",trimws(record[3]),"  ",bamFile)
-	print(cmd)
-	depthTable=system(cmd,intern=TRUE)
-	if ( length(depthTable) >0 ){
-		depthList= as.numeric(unlist(lapply(strsplit(depthTable,"\t"),function(x)x[3])) )
-		png(paste0(record[4],'.png'))
-		plot(depthList,type='l',main=paste(record,collapse=':'))
-		dev.off()
-	}
-
+apply(broadPeak[1:500,],1,function(x){
+ 	chrom            = trimws(x[1])
+	chromstart       = as.numeric(x[2])
+	chromend         = as.numeric(x[3])
+	png( paste0(trimws(x[4]),'_broadPeak.png') )
+	plotBedgraph(inputBed,chrom,chromstart,chromend,color='red')
+	plotBedgraph(chipBed,chrom,chromstart,chromend ,color='blue',
+				 transparency=.50,overlay=TRUE,rescaleoverlay=TRUE)
+	labelgenome(chrom, chromstart,chromend,side=3,n=3,scale="Mb")
+	dev.off()
 })
 
-Why there are TP53 mutation in non-cancer samples? Really feel surprising??
-http://www.ncbi.nlm.nih.gov/pubmed/27377626
-Identification of Circulating Tumor DNA for the Early Detection of Small-cell Lung Cancer.
-
-Import, count, index, filter, sort, and merge ‘BAM’ (binary alignment) files : http://rpackages.ianhowson.com/bioc/Rsamtools/man/scanBam.html
-
-ENCODE计划的转录因子列表： http://v1.factorbook.org/mediawiki/index.php/Welcome_to_factorbook
-
-paper:2014-BAF180 promotes cohesion and prevents genome instability and aneuploidy.: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3988838/
-Genome-wide maps of BAF180 and REV-ERBα binding : http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE67852
-Overview for SWI/SNF chromatin remodeling complex : http://www.jbc.org/content/287/37/30897.full
-IL-10 transcription is negatively regulated by BAF180 : http://bmcimmunol.biomedcentral.com/articles/10.1186/1471-2172-13-9
-
-Average ChIP-Seq Gene Profile 	http://www.zymoresearch.com/media/images/land/services/chip-seq/3-Average%20Gene%20Profile.png
-ChIP-Seq Peaks Over Chromosomes:http://www.zymoresearch.com/media/images/land/services/chip-seq/2-Peaks%20Over%20Chromosomes.png
-Creating Meta-Gene Profiles 	http://homer.salk.edu/homer/ngs/metaGeneHomer1.png
-Histograms of Motif Densities:	http://homer.salk.edu/homer/ngs/motifDistExample.png
-Data Matrix for heatmap 	 :	http://homer.salk.edu/homer/ngs/heatmapExample.png
-the results of average profiling within/near important genomic features : http://liulab.dfci.harvard.edu/CEAS/pic/figure6.jpg
-the nucleosomes near the TSS of expressed genes:  
-http://ccg.vital-it.ch/chipseq/doc/f1_Barski&Schones_vs_CAGE.png
-http://ccg.vital-it.ch/chipseq/doc/f1_Schones_vs_CAGE.png
-http://ccg.vital-it.ch/chipseq/doc/f3_STAT1vsTSS.png
-
-all figures in chip-seq workflow : http://www.nature.com/neuro/journal/v17/n11/fig_tab/nn.3816_F2.html
-CHIP-seq综述：
-http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003326
-http://genome.cshlp.org/content/22/9/1813.full.pdf+html
-http://genomebiology.biomedcentral.com/articles/10.1186/gb-2008-9-9-r137
-http://www.nature.com/nrg/journal/v10/n10/pdf/nrg2641.pdf
-http://www.nature.com/nrg/journal/v13/n12/abs/nrg3306.html
-http://nar.oxfordjournals.org/content/early/2012/05/18/nar.gks433.short
- identification of Protein–DNA binding sites with SISSRs peak-finder http://rd.springer.com/protocol/10.1007/978-1-61779-400-1_20#page-1 
-Normalization, bias correction, and peak calling for ChIP-seq ： http://www.degruyter.com/dg/viewarticle.fullcontentlink:pdfeventlink/$002fj$002fsagmb.2012.11.issue-3$002f1544-6115.1750$002f1544-6115.1750.pdf/1544-6115.1750.pdf?t:ac=j$002fsagmb.2012.11.issue-3$002f1544-6115.1750$002f1544-6115.1750.xml
 
 
-average ChIP signal profiles on top 10 % , middle 10 %, and bottom 10 % of expressed genes	http://liulab.dfci.harvard.edu/CEAS/pic/figure13.jpg
-Illustration of how variability in an INPUT-seq profile can affect reconstruction of average signal https://openi.nlm.nih.gov/imgs/512/49/3053263/PMC3053263_1471-2164-12-134-4.png
-Average profiles of modified histones around the summit of ChIP-seq peaks.	 https://www.researchgate.net/figure/233829852_fig2_Average-profiles-of-modified-histones-around-the-summit-of-ChIP-seq-peaks-Profiles-are
-tissue-specific enhancers and promoters : http://www.nature.com/nsmb/journal/v18/n8/full/nsmb.2085.html?annotation=1 
- Heatmap with all genes scaled to one size and user-specified groups of genes:  https://github.com/fidelram/deepTools/wiki/Visualizations
-Binding of Other Transcription Factors or Histone Marks at the GABP Peaks :http://v1.factorbook.org/mediawiki/index.php/GABP
-An overview of ChIP–seq, DNase-seq, ATAC-seq, MNase-seq and FAIRE–seq experiments.	：http://www.nature.com/nrg/journal/v15/n11/fig_tab/nrg3788_F1.html
+NCBI的参考基因组协会：The Genome Reference Consortium，只有4个物种现在
+http://www.ncbi.nlm.nih.gov/projects/genome/assembly/grc/mouse/data/
 
-通过CHIP-seq数据来准确定义 enhancers 不是一件简单事情 (Question: Tools to identify enhancers from chromatin marks:https://www.biostars.org/p/200697/#200801)
-The problem is that there is not a good definition of "enhancer". Do you use "overlap of H3K4me1 and H3K4me3"? Or maybe "high ratio of H3K4me1 to H3K4me3". Maybe require DNase hypersensitivity. And maybe require some threshold of acetylation. Ideally you would also require evidence of long-range interaction with at least one promoter. There are many differing definitions in the literature along these lines. Another option is to use chromatin segmentation tools which find patterns in your data that you can then interpret as "enhancer-like". An advantage to this is that you can find some interesting results, like different classes of enhancers that you otherwise might not have found. And you can always use the ad hoc enhancer definitions to look for enrichment in chromatin segmentations.
-
- 
-BLIMP1 binding to gene promoters encoding transcription factors, and cell-cycle and developmental regulators http://www.nature.com/ncb/journal/v15/n8/fig_tab/ncb2798_F2.html
-本文数据都在EBI上面，对老鼠测序： http://www.ebi.ac.uk/arrayexpress/search.html?query=BLIMP1+ChIP-seq
- GSE25409 for the PRDM14 ChIP-seq  
- GSE24841 for the SIN3a ChIP-seq  
- GSE20530 for the NELFA ChIP-seq  
- GSE26680 for the RING1B ChIP-seq 
- GSE13084 for EZH2 ChIP-seq
-以上5个数据是它引用的GEO的公共数据
- 
-nodes and cores and threads and CPUs and processors ! 
-A thread is a single line of commands that are getting processed, each application has at least one thread, most have multiples. A core is the physical hardware that works on the thread. In general a processor can only work on one thread per core, CPUs with hyper threading can work on up to two threads per core.
-For processors with hyper threading, there are extra registers and execution units in the core so it can store the state of two threads and work on them both, normally to change threads you have to empty the registers into the cache, write that back to the main memory, then load up the cache with the new values and load up the registers, context switches hurt performance significantly.
-
-
-文献数据解读：Genome-wide maps of H3K4me2/3 in prostate cancer cell line LNCaP http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE20042
-想看看用dihydrotestosterone处理了 cancer cell line LNCaP 这个细胞系之后，看看组蛋白甲基化修饰变化
-主要是为了分析差异 核小体定位点 区别：Model for identifying differential transcription factor binding locations
-这个软件很旧了，也是哈佛刘小乐实验室出品的：NPS was used to identify nucleosome positions based on treatment condition data.
-同时也测了芯片数据：Affymetrix U133 Plus 2.0 microarray data，但是似乎并没有给地址
-
-首先下载数据
-cd ~/CHIPseq_test/
-mkdir GSE20042_H3K4me2_3 && cd GSE20042_H3K4me2_3 
-mkdir rawData && cd rawData
-for ((i=146;i<153;i++)) ;do wget ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP002/SRP002077/SRR037$i/SRR037$i.sra;done
-GSM503903	H3K4me2_Vehicle_ChIPSeq	SRR037146(Read 7,530,267 spots )/SRR037147(Read 6,215,981 spots )
-GSM503904	H3K4me2_DHT_4h_ChIPSeq	SRR037148(Read 6,510,159 spots )/SRR037149(Read 6,246,716 spots )
-GSM503905	H3K4me2_DHT_16h_ChIPSeq	SRR037150	Read 9,685,845 spots  
-GSM503906	H3K4me3_Vehicle_ChIPSeq	SRR037151	Read 6,755,854 spots 
-GSM503907	H3K4me3_DHT_4h_ChIPSeq	SRR037152	Read 4,761,769 spots 
-ls *sra |while read id; do ~/biosoft/sratoolkit/sratoolkit.2.6.3-centos_linux64/bin/fastq-dump $id;done
-rm *sra
-ls *.fastq | while read id ; do ~/biosoft/fastqc/FastQC/fastqc $id;done
-mkdir QC_results
-mv *zip *html QC_results/
-接下来做比对
-## cat >run_bowtie2.sh
-ls *.fastq | while read id ; 
-do  
-echo $id
-~/biosoft/bowtie/bowtie2-2.2.9/bowtie2 -3 5 -p 8 -x ~/biosoft/bowtie/hg19_index/hg19 -U $id   -S ${id%%.*}.sam  2>${id%%.*}.align.log; 
-samtools view -bhS -q 30  ${id%%.*}.sam > ${id%%.*}.bam  ## -F 1548 https://broadinstitute.github.io/picard/explain-flags.html
-samtools sort   ${id%%.*}.bam ${id%%.*}.sorted  ## prefix for the output  
-samtools index ${id%%.*}.sorted.bam 
-done 
-然后下载GEO的核小体定位点(peaks)结果：
-tar xvf GSE20042_RAW.tar
-ls *gz |xargs gunzip
-wc -l *txt 
-  235639 GSM503903_LNCaP_H3K4me2_Vehicle_2Lanes_normalized_peak.txt
-  248570 GSM503904_LNCaP_H3K4me2_DHT_4h_2Lanes_normalized_peak.txt
-  185892 GSM503905_LNCaP_H3K4me2_DHT_16h_peak.txt
-   74491 GSM503906_LNCaP_H3K4me3_Vehicle_normalized_peak.txt
-  104022 GSM503907_LNCaP_H3K4me3_DHT_4h_normalized_peak.txt
-然后根据比对的bam文件来可视化这些核小体peaks,很诡异，不知道他是如何找到的这些peaks
-Rscript ~/CHIPseq_test/peakView.R GSM503907_LNCaP_H3K4me3_DHT_4h_normalized_peak.bed  ../rawData/SRR037152.sorted.bam
-
-我用MACS2软件来call peaks 看看： 
-# http://www2.uef.fi/documents/1698400/2466431/Macs2/f4d12870-34f9-43ef-bf0d-f5d087267602
-ls *sorted.bam |while read id;do ( nohup time ~/.local/bin/macs2 callpeak -t $id -f BAM -g hs -n ${id%%.*} 2>${id%%.*}.masc2.log &) ;done 
-mkdir ../MACS2results
-mv *bed *xls *Peak *r  ../MACS2results
-cd ../MACS2results
-ls *.xls | while read id ; 
-do  
-echo $id
-grep '^chr\S' $id |perl -alne '{print "$F[0]\t$F[1]\t$F[2]\t$F[9]\t$F[7]\t+"}' >${id%%.*}.bed
-done 
-然后重新浏览peaks
-Rscript ~/CHIPseq_test/peakView.R SRR037152_peaks.bed  ../rawData/SRR037152.sorted.bam
-看起来我call的peaks更靠谱一点，不知道那边在搞些什么
-三种peaks的区别：  https://www.biostars.org/p/159925/ 
-UCSC定义三种peaks的columns ： https://genome.ucsc.edu/FAQ/FAQformat.html#format12
-
-http://www.strand-ngs.com/files/promotions/StrandNGS-ChIPseq-broadPeaks.pdf
-mkdir ~/tmp/roadmap/H3K4me1 
-wget http://www.broadinstitute.org/~anshul/projects/roadmap/peaks/consolidated/broadPeak/E001-H3K4me1.broadPeak.gz 
-wget http://www.broadinstitute.org/~anshul/projects/roadmap/peaks/consolidated/gappedPeak/E001-H3K4me1.gappedPeak.gz 
-wget http://www.broadinstitute.org/~anshul/projects/roadmap/peaks/consolidated/narrowPeak/E001-H3K4me1.narrowPeak.gz 
-wget http://www.broadinstitute.org/~anshul/projects/roadmap/alignments/consolidated/E001-H3K4me1.tagAlign.gz 
-wget http://www.broadinstitute.org/~anshul/projects/roadmap/alignments/consolidated/E001-Input.tagAlign.gz
-wget http://www.broadinstitute.org/~anshul/projects/roadmap/rawdata/Release9/experiment-sample/Histone_H3K4me1/ES-I3_Cell_Line/BI.ES-I3.H3K4me1.Lib_MC_20100211_02--ChIP_MC_20100208_02_hES_I3_TESR_H3K4Me1.bed.gz
-wget http://www.broadinstitute.org/~anshul/projects/roadmap/rawdata/Release9/experiment-sample/Histone_H3K4me1/ES-I3_Cell_Line/BI.ES-I3.H3K4me1.Solexa-15382.bed.gz
-
- 
-然后同样的用CEAS来画一些图 
-cd ~/CHIPseq_test/annotation/
- 
-
- 
- 
-
+## Download and install HTSeq  
+## http://www-huber.embl.de/users/anders/HTSeq/doc/overview.html
+## https://pypi.python.org/pypi/HTSeq
+cd ~/biosoft
+mkdir HTSeq &&  cd HTSeq
+wget  ~~~~~~~~~~~~~~~~~~~~~~HTSeq-0.6.1.tar.gz
+tar zxvf HTSeq-0.6.1.tar.gz
+cd HTSeq-0.6.1
+python setup.py install --user 
+## ~/.local/bin/htseq-count  --help
+## ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M1/
+## http://hgdownload-test.cse.ucsc.edu/goldenPath/mm10/liftOver/
+GRCm38/mm10 (Dec, 2011) 
+ls *bam |while read id;do ( ~/.local/bin/htseq-count  -f bam  $id   genecode/mm9/gencode.vM1.annotation.gtf.gz  1>${id%%.*}.gene.counts ) ;done 
+ls *bam |while read id;do ( ~/.local/bin/htseq-count  -f bam -i exon_id  $id   genecode/mm9/gencode.vM1.annotation.gtf.gz  1>${id%%.*}.exon.counts ) ;done 
 
 
